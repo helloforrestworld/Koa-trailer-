@@ -8,10 +8,13 @@
     "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "start": "npm run dev",
     "lint": "eslint --ext .js,.vue src",
-    "build": "node build/build.js"
+    "build": "node build/build.js",
+    "test": "node server/index.js"
   },
   "dependencies": {
     "babel-polyfill": "^6.26.0",
+    "koa": "^2.5.1",
+    "koa-logger": "^3.2.0",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
     "vuetify": "^1.0.17"
