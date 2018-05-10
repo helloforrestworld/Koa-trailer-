@@ -68,28 +68,24 @@
       </v-layout>
     </v-toolbar>
     <v-content>
-      <v-container fill-height>
-        <v-layout justify-center align-center>
-          <v-flex shrink>
-            <v-tooltip right>
-              <v-btn
-                slot="activator"
-                :href="source"
-                icon
-                large
-                target="_blank"
-              >
-                <v-icon large>code</v-icon>
-              </v-btn>
-              <span>Source</span>
-            </v-tooltip>
-            <v-tooltip right>
-              <v-btn slot="activator" icon large href="https://codepen.io/johnjleider/pen/YeRKwQ" target="_blank">
-                <v-icon large>mdi-codepen</v-icon>
-              </v-btn>
-              <span>Codepen</span>
-            </v-tooltip>
-          </v-flex>
+      <v-container fluid fill-height>
+        <v-layout space-around row wrap>
+          <v-flex v-for="(item, index) in 16" class="mt-5 mr-3">
+           <v-card>
+             <v-card-media src="https://img3.doubanio.com/view/photo/l_ratio_poster/public/p2515018270.jpg" height="200px">
+             </v-card-media>
+             <v-card-title primary-title>
+               <div>
+                 <h3 class="headline mb-0">Kangaroo Valley Safari</h3>
+                 <div>Located two hours south of Sydney in the <br>Southern Highlands of New South Wales, ...</div>
+               </div>
+             </v-card-title>
+             <v-card-actions>
+               <v-btn flat color="orange">Share</v-btn>
+               <v-btn flat color="orange">Explore</v-btn>
+             </v-card-actions>
+           </v-card>
+         </v-flex>
         </v-layout>
       </v-container>
     </v-content>
@@ -120,3 +116,6 @@
     }
   }
 </script>
+
+<style media="screen">
+</style>

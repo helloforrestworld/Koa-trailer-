@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "> 电影预告片网站",
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
+    "puppeteer": "^1.4.0",
+    "request": "^2.85.0",
+    "request-promise-native": "^1.0.5",
     "vue": "^2.5.16",
     "vue-router": "^3.0.1",
     "vuetify": "^1.0.17"
