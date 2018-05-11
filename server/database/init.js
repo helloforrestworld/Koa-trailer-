@@ -1,7 +1,13 @@
 const mongoose = require('mongoose')
 const db = 'mongodb://localhost/local'
+const glob = require('glob') // 加载匹配到的模块
+const { resolve } = require('path')
 
 mongoose.Promise = global.Promise // 老版本的mongoose 实现的Promise不太一样
+
+exports.initSchemas = () => { // 同步加载所有schema方法
+  glob.sync(resolve(__dirname, './schema', '**/*.js')).forEach(require)
+}
 
 exports.connect = () => {
   
@@ -30,12 +36,6 @@ exports.connect = () => {
     
     mongoose.connection.once('open', () => {
       resolve()
-      let Dog = mongoose.model('Dog', {name: String})
-      let dog1 = new Dog({name: 'jackey'})
-      
-      dog1.save().then(() => {
-        console.log('dog1存储成功')
-      })
       
       failTime = 0
       console.log('MongoDB Connectd Successfully!')
