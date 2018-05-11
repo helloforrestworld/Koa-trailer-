@@ -1,4 +1,18 @@
 const base = 'https://movie.douban.com/subject/'
+
+// const baseArr = [
+//   { doubanId: 27160683,
+//    title: '忍者蝙蝠侠',
+//    rate: 7.1,
+//    poster: 'https://img3.doubanio.com/view/photo/l_ratio_poster/public/p2506695706.jpg' 
+//   },
+//   { doubanId: 26905703,
+//    title: '人工智能：灭绝危机',
+//    rate: 4,
+//    poster: 'https://img3.doubanio.com/view/photo/l_ratio_poster/public/p2473817886.jpg' 
+//   }
+// ]
+
 const doubanId = 27160683
 
 const puppeteer = require('puppeteer')

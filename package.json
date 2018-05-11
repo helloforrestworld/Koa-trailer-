@@ -4,6 +4,7 @@
   "description": "> 电影预告片网站",
   "dependencies": {
     "babel-polyfill": "^6.26.0",
+    "mongoose": "^5.1.0",
     "puppeteer": "^1.4.0",
     "request": "^2.85.0",
     "request-promise-native": "^1.0.5",
