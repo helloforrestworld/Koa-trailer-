@@ -9,11 +9,10 @@ const {connect, initSchemas} = require('./database/init')
   
   initSchemas() // 初始化schema
   
-  // 测试
-  const Movie = mongoose.model('Movie')
-  const movies = await Movie.find({})
-  console.log(movies)
-  
+  // require('./tasks/movie.js') // 启用movie.js爬虫脚本
+  // require('./tasks/api.js') // 通过豆瓣请求详细数据
+  // require('./tasks/trailer.js') // 封面图和预告片视频地址
+  // require('./tasks/qiniu.js') // 七牛存储静态资源
   app.use(logger())
   
   app.use(async (ctx, next) => {

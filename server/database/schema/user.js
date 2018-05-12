@@ -39,11 +39,11 @@ const userSchema = new Schema({
   }
 })
 
-userSchema.virtual('isLocked').get(() => { // 虚拟字段  是否被锁定
+userSchema.virtual('isLocked').get(function () { // 虚拟字段  是否被锁定
   return !!(this.lockUntil && this.lockUntil > Date.now())
 })
 
-userSchema.pre('save', next => { // 保存一条数据前
+userSchema.pre('save', function (next) { // 保存一条数据前
   if (this.isNew) {
     this.meta.createdAt = this.meta.updatedAt = Date.now()
   } else {
@@ -51,7 +51,7 @@ userSchema.pre('save', next => { // 保存一条数据前
   }
   next()
 })
-userSchema.pre('save', next => { // 保存一条数据前
+userSchema.pre('save', function (next) { // 保存一条数据前
   if (!this.isModified('password')) return next() // 密码没被修改
   
   // 加密处理

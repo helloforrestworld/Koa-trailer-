@@ -11,7 +11,6 @@ const sleep = time => new Promise(resolve => {
       console.log('Start visit the target page')
       const browser = await puppeteer.launch({
         executablePath: resolve(__dirname, './chromium/chrome.exe'),
-        headless: false,
         args: ['--no-sandbox'],
         dumpio: false
       })

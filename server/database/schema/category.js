@@ -23,7 +23,7 @@ const categorySchema = new Schema({
   }
 })
 
-categorySchema.pre('save', next => { // 保存一条数据前
+categorySchema.pre('save', function (next) { // 保存一条数据前
   if (this.isNew) {
     this.meta.createdAt = this.meta.updatedAt = Date.now()
   } else {

@@ -1,9 +1,19 @@
 const cp = require('child_process')
 const {resolve} = require('path')
 
+const mongoose = require('mongoose')
+const Movie = mongoose.model('Movie')
+
 ;(async () => {
+  let movies = await Movie.find({ // 获取需要爬video的movie数据
+    $or: [
+      {video: {$exists: false}},
+      {video: null}
+    ]
+  }).exec()
+  
   const script =  resolve(__dirname, '../crawler/video')
-  const child = cp.fork(script, [])
+  const child = cp.fork(script, []) // 开启子进程 等待信息传递
   let invoked = false
   
   child.on('error', err => {
@@ -24,7 +34,20 @@ const {resolve} = require('path')
     console.log(err)
   })
   
-  child.on('message', data => {
-    console.log(data)
+  child.on('message', async (data) => {
+    let doubanId = data.doubanId
+    let movie = await Movie.findOne({
+      doubanId: doubanId
+    }).exec()
+    
+    if (data.video) {
+      movie.video = data.video
+      movie.cover = data.cover
+      
+      await movie.save()
+    } else {
+      await movie.remove()
+    }
   })
+  child.send(movies) // 开始爬虫
 })()

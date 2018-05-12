@@ -8,10 +8,10 @@ const movieSchema = new Schema({
     unique: true,
     type: String
   },
-  category: {
+  category: [{
     type: ObjectId,
     ref: 'Category' // 引用关系
-  },
+  }],
   rate: Number,
   title: String,
   summary: String,
@@ -42,7 +42,7 @@ const movieSchema = new Schema({
   }
 })
 
-movieSchema.pre('save', next => { // 保存一条数据前
+movieSchema.pre('save', function (next) { // 保存一条数据前
   if (this.isNew) {
     this.meta.createdAt = this.meta.updatedAt = Date.now()
   } else {

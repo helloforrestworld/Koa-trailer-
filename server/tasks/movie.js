@@ -1,6 +1,9 @@
 const cp = require('child_process')
 const {resolve} = require('path')
 
+const mongoose = require('mongoose')
+const Movie = mongoose.model('Movie')
+
 ;(async () => {
   const script =  resolve(__dirname, '../crawler/trailer-list')
   const child = cp.fork(script, [])
@@ -25,6 +28,19 @@ const {resolve} = require('path')
   })
   
   child.on('message', data => {
-    console.log(data.result)
+    let result = data.result // 爬虫后movies的数据导入数据库
+    
+    result.forEach(async (item) => {
+      if (!item.doubanId) return
+      
+      let movie = await Movie.findOne({
+        doubanId: item.doubanId
+      }).exec()
+      
+      if (!movie) {
+        movie = new Movie(item)
+        await movie.save()
+      }
+    })
   })
 })()

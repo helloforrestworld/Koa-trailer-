@@ -1,20 +1,21 @@
 // 上传数据到七牛图床
-// { doubanId: 27160683,
-//     title: '忍者蝙蝠侠',
-//     rate: 7.1,
-//     poster: 'https://img3.doubanio.com/view/photo/l_ratio_poster/public/p2506695706.jpg' 
-// },
 
 const qiniu = require('qiniu')
 const nanoid = require('nanoid') // 生成随机ID作为静态资源文件名
 const config = require('../config')
+const mongoose = require('mongoose')
 
+
+// 七牛认证
 const bucket = config.qiniu.bucket
 const mac = new qiniu.auth.digest.Mac(config.qiniu.AK, config.qiniu.SK)
 const cfg = new qiniu.conf.Config()
 const client = new qiniu.rs.BucketManager(mac, cfg)
 
-const uploadToQiniu = async (url, key) => {
+const Movie = mongoose.model('Movie')
+
+// 七牛download数据方法
+const uploadToQiniu = async (url, key) => { 
   return new Promise((resolve, reject) => {
     client.fetch(url, bucket, key, (err, ret, info) => {
       if (err) {
@@ -30,15 +31,18 @@ const uploadToQiniu = async (url, key) => {
   })
 }
 
+// 开始上传数据
 ;(async () => {
-  let movies = [{
-    doubanId: 27160683,
-    video: 'http://vt1.doubanio.com/201805112330/08f8c408e430d33ca33704ea2724d48b/view/movie/M/302270554.mp4',
-    cover: 'https://img3.doubanio.com/img/trailer/medium/2513586693.jpg?',
-    poster: 'https://img3.doubanio.com/view/photo/l_ratio_poster/public/p2506695706.jpg'
-  }]
+  let movies = await Movie.find({
+    $or: [
+      {videoKey: {$exists: false}},
+      {videoKey: null},
+      {videoKey: ''}
+    ]
+  }).exec()
   
-  movies.map(async movie => {
+  for (let i = 0; i < movies.length; i ++) {
+    let movie = movies[i]
     if (movie.video && !movie.key) {
       try {
         console.log('准备获取并上传video')
@@ -57,21 +61,14 @@ const uploadToQiniu = async (url, key) => {
         if (posterData.key) {
           movie.posterKey = posterData.key
         }
-        console.log(movie)
+        
+        await movie.save()
       } catch(err) {
         console.log(err)
       }
     }
-  })
+  }
 })()
-
-// { doubanId: 27160683,
-//   video: 'http://vt1.doubanio.com/201805112330/08f8c408e430d33ca33704ea2724d48b/view/movie/M/302270554.mp4',
-//   cover: 'https://img3.doubanio.com/img/trailer/medium/2513586693.jpg?',
-//   poster: 'https://img3.doubanio.com/view/photo/l_ratio_poster/public/p2506695706.jpg',
-//   videoKey: 'ciR_9lBN9u4m98A9F0EM0.mp4',
-//   coverKey: 'sNRen81_THL8WBldRSjIO.png',
-//   posterKey: 'L50JCu_8dMng6tmzWB8H~.png' }
 
 
 
