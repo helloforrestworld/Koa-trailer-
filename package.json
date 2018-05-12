@@ -6,6 +6,7 @@
     "babel-polyfill": "^6.26.0",
     "bcrypt": "^2.0.1",
     "glob": "^7.1.2",
+    "koa-router": "^7.4.0",
     "mongoose": "^5.1.0",
     "nanoid": "^1.0.2",
     "puppeteer": "^1.4.0",
