@@ -3,7 +3,7 @@ const app = new koa()
 const logger = require('koa-logger')
 const mongoose = require('mongoose')
 const {connect, initSchemas} = require('./database/init')
-const router = require('./routes')
+// const router = require('./routes')
 
 ;(async () => {
   await connect() // 连接数据库
@@ -16,9 +16,9 @@ const router = require('./routes')
   // require('./tasks/qiniu.js') // 七牛存储静态资源
   app.use(logger())
   
-  app
-    .use(router.routes())
-    .use(router.allowedMethods())
+  // app
+  //   .use(router.routes())
+  //   .use(router.allowedMethods())
   
   app.use(async (ctx, next) => {
     ctx.body = '电影首页'
