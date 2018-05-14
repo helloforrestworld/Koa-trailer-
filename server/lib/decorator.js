@@ -6,7 +6,7 @@ const _ = require('lodash')
 const symbolPrefix = Symbol('prefix')
 const routerMap = new Map()
 
-const isArray = c => _.isArray(c) ? c : [c] 
+const isArray = c => _.isArray(c) ? c : [c]
 
 export class Route {
   constructor (app, apiPath) {
@@ -20,10 +20,10 @@ export class Route {
     // 加载路由
     glob.sync(resolve(this.apiPath, '**/*.js')).forEach(require)
     
-    // 装饰路由
+    // 从routerMap读取路径和方法 初始化路由
     for (let [conf, controller] of routerMap) {
       const controllers = isArray(controller)
-      cosnt prefixPath = conf.target[symbolPrefix]
+      let prefixPath = conf.target[symbolPrefix]
       
       if (prefixPath) prefixPath = normalizePath(prefixPath)
       const routerPath = prefixPath + conf.path
@@ -31,7 +31,7 @@ export class Route {
     }
     
     this.app.use(this.router.routes())
-    this.app.use(router.allowedMethods())
+    this.app.use(this.router.allowedMethods())
   }
 }
 
@@ -44,7 +44,8 @@ const router = conf => (target, key, descriptor) => {
   
   routerMap.set({
     target: target,
-    ...conf
+    path: conf.path,
+    method: conf.method
   }, target[key])
 }
 

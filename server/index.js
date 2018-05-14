@@ -1,9 +1,24 @@
 const koa = require('koa')
 const app = new koa()
 const logger = require('koa-logger')
+const {resolve} = require('path')
 const mongoose = require('mongoose')
 const {connect, initSchemas} = require('./database/init')
-// const router = require('./routes')
+const R = require('ramda')
+const MIDDLEWARES = ['router']
+
+// 加载中间件数组
+const useMiddlewares = (app) => {
+  R.map(
+    R.compose(
+      R.forEachObjIndexed( // 每个属性依次执行给定函数
+        initWith => initWith(app) //initWith 引入的函数
+      ),
+      require, // 引入
+      name => resolve(__dirname, `./middlewares/${name}`) // 路径
+    )
+  )(MIDDLEWARES)
+}
 
 ;(async () => {
   await connect() // 连接数据库
@@ -16,13 +31,7 @@ const {connect, initSchemas} = require('./database/init')
   // require('./tasks/qiniu.js') // 七牛存储静态资源
   app.use(logger())
   
-  // app
-  //   .use(router.routes())
-  //   .use(router.allowedMethods())
-  
-  app.use(async (ctx, next) => {
-    ctx.body = '电影首页'
-  })
+  await useMiddlewares(app)
   
   app.listen(3333, (err) => {
     if (err) {
