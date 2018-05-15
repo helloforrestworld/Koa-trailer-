@@ -37,7 +37,7 @@
     "parcel-plugin-vue": "^1.5.0"
   },
   "scripts": {
-    "build": "set NODE_ENV=production&& nodemon server/start.js",
+    "exec": "set NODE_ENV=production&& nodemon server/start.js",
     "start": "set NODE_ENV=devlopment&& nodemon server/start.js"
   },
   "repository": {
