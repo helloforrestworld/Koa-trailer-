@@ -5,7 +5,7 @@ const {resolve} = require('path')
 const mongoose = require('mongoose')
 const {connect, initSchemas} = require('./database/init')
 const R = require('ramda')
-const MIDDLEWARES = ['router']
+const MIDDLEWARES = ['router', 'parcel']
 
 // 加载中间件数组
 const useMiddlewares = (app) => {
