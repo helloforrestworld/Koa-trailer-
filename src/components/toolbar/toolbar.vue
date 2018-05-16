@@ -93,7 +93,6 @@ export default {
       if (this.$route.path !== '/') { // 左边导航收起
         this.drawer = false
       } else {
-        console.log(this.$route.path)
         this.drawer = true
       }
     })

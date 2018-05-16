@@ -19,15 +19,45 @@
               <v-tab ripple class="tab-title">
                 相关电影
               </v-tab>
-              <v-tab-item>
-                <v-card flat>
-                  <v-card-text>{{ text }}</v-card-text>
-                </v-card>
+              <v-tab-item class="moviedesc">
+                <dl v-if="movieDatail.title">
+                  <dt>
+                    <h2>{{movieDatail.title}}</h2>
+                  </dt>
+                  <dd>
+                    <span class="dd-title">豆瓣评分：</span>
+                    <span class="rate">{{movieDatail.rate}}</span>分
+                  </dd>
+                  <dd>
+                    <span class="dd-title">上映日期：</span>{{formateDate(movieDatail.pubdate)}}
+                  </dd>
+                  <dd>
+                    <span class="dd-title">标签：</span>{{tags(movieDatail.tags)}}
+                  </dd>
+                  <dd>
+                    <span class="dd-title">分类：</span>{{tags(movieDatail.movieTypes)}}
+                  </dd>
+                  <dd>
+                    <p class="summary">
+                      <span class="dd-title">概要：</span>{{movieDatail.summary}}
+                    </p>
+                  </dd>
+                </dl>
               </v-tab-item>
               <v-tab-item>
-                <v-card flat>
-                  <v-card-text>{{ text }}</v-card-text>
-                </v-card>
+                <v-list two-line>
+                  <template v-for="(item, index) in relativeMovies">
+                    <v-list-tile avatar @click="tabRelative(item)">
+                      <v-list-tile-avatar>
+                        <img :src="addBase(item.posterKey)">
+                      </v-list-tile-avatar>
+                      <v-list-tile-content>
+                        <v-list-tile-title v-html="item.title"></v-list-tile-title>
+                        <v-list-tile-sub-title v-html="item.summary"></v-list-tile-sub-title>
+                      </v-list-tile-content>
+                    </v-list-tile>
+                  </template>
+                </v-list>
               </v-tab-item>
             </v-tabs>
           </v-flex>
@@ -39,27 +69,21 @@
 <script>
 import axios from 'axios'
 import DPlayer from 'DPlayer'
-import {baseUrlMixin} from '../../common/js/mixin'
+import {baseUrlMixin, handleContent} from '../../common/js/mixin'
 
 export default {
   name: "movie-detail",
-  mixins: [baseUrlMixin],
+  mixins: [baseUrlMixin, handleContent],
   data() {
     return {
       movieDatail: {},
+      relativeMovies: [],
       active: '0',
       text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.'
     }
   },
   created() {
-    // 电影详情
-    const id = this.$route.params.id
-    axios.get('/api/v0/movies/' + id).then(res => {
-      if (res.status === 200) {
-        this.movieDatail = res.data.data
-        this.tabVideo(this.movieDatail.movie)
-      }
-    })
+    this.initData(this.$route.params.id)
   },
   mounted() {
     // 播放器初始化
@@ -78,6 +102,15 @@ export default {
     })
   },
   methods: {
+    initData(id) { // 根据id请求数据
+      axios.get('/api/v0/movies/' + id).then(res => {
+        if (res.status === 200) {
+          this.movieDatail = res.data.data.movie
+          this.relativeMovies = res.data.data.relativeMovies
+          this.tabVideo(this.movieDatail)
+        }
+      })
+    },
     tabVideo(item) {
       const url = this.addBase(item.videoKey)
       const pic = this.addBase(item.coverKey)
@@ -85,6 +118,21 @@ export default {
       this.dp.switchVideo(
         { url, pic, thumbnails }
       )
+    },
+    tabRelative(item) {
+      this.$router.push(`/detail/${item._id}`)
+    },
+    tags(args) {
+      let ret = ``
+      for (let i = 0; i < args.length; i++) {
+        ret += `${i !== 0 ? '/' : ''}${args[i]}` 
+      }
+      return ret
+    }
+  },
+  watch: {
+    $route(newRoute) {
+      this.initData(newRoute.params.id)
     }
   }
 }
@@ -98,6 +146,22 @@ export default {
  }
  .movie-detail .content .flex.xs2 .tab-title .tabs__item{
    color: white !important;
+ }
+ .movie-detail .content .flex.xs2 .moviedesc {
+   padding: 6px 4px 0px 12px;
+ }
+ .movie-detail .content .flex.xs2 .moviedesc .rate{
+   display: inline-block;
+   padding: 0px 4px;
+   background-color: green;
+   border-radius: 4px;
+   margin-right: 4px;
+ }
+ .movie-detail .content .flex.xs2 .moviedesc .dd-title{
+   color: rgb(245, 187, 181);
+ }
+ .movie-detail .content .flex.xs2 .moviedesc .summary {
+   padding-top: 10px;
  }
  .movie-detail .detail-player{
    height: 100%;

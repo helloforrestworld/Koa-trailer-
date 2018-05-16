@@ -28,11 +28,11 @@
 <script>
 import axios from 'axios'
 import {mapMutations} from 'vuex'
-import {baseUrlMixin} from '../../common/js/mixin.js'
+import {baseUrlMixin, handleContent} from '../../common/js/mixin.js'
 
 export default {
   name: "home",
-  mixins: [baseUrlMixin],
+  mixins: [baseUrlMixin, handleContent],
   created() {
     // 推荐页数据
     axios.get('/api/v0/movies').then(res => {
@@ -47,18 +47,6 @@ export default {
   methods: {
     elisSummary(sum) { // 概要截断
       return sum.length > 100 ? sum.slice(0, 100) + '...' : sum
-    },
-    formateDate(pubdates) { // 格式化发行日期 2017-1-1(美国)/2017-3-1(中国)
-      let ret = ''
-      pubdates.forEach((pubdate, index) => {
-        let now = new Date(pubdate.date)
-        ret += now.getFullYear() + '-' + now.getMonth() + '-' + now.getDate()
-        if (pubdate.country) {
-          ret += `(${pubdate.country})`
-          if (!(index === pubdates.length - 1)) ret += '/'
-        }
-      })
-      return ret
     },
     addTrailer(item) { // 播放预告片
       this.tabVideo(item)
