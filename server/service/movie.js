@@ -3,9 +3,8 @@ const mongoose = require('mongoose')
 const Movie = mongoose.model('Movie')
 export const getAllMovies =  async (type, year) => {
   let query = {}
-  
   if (type) {
-    query.moviesTypes = {
+    query.movieTypes = {
       $in: [type]
     }
   }
@@ -13,8 +12,7 @@ export const getAllMovies =  async (type, year) => {
   if (year) {
     query.year = year
   }
-  
-  const movies = await Movie.find(query).exec()
+  const movies = await Movie.find(query)
   
   return movies
 }

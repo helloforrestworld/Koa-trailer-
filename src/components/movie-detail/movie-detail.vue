@@ -7,6 +7,7 @@
             <div class="detail-player" ref="detailPlayer"></div>
           </v-flex>
           <v-flex xs2>
+            <router-link class="back" :to="{ path: '/'}">回到首页</router-link>
             <v-tabs
               v-model="active"
               color="green"
@@ -111,7 +112,7 @@ export default {
         }
       })
     },
-    tabVideo(item) {
+    tabVideo(item) { // 切换视频源
       const url = this.addBase(item.videoKey)
       const pic = this.addBase(item.coverKey)
       const thumbnails = this.addBase(item.posterKey)
@@ -119,10 +120,10 @@ export default {
         { url, pic, thumbnails }
       )
     },
-    tabRelative(item) {
+    tabRelative(item) { // 跳转相关电影
       this.$router.push(`/detail/${item._id}`)
     },
-    tags(args) {
+    tags(args) { // 格式化tags、movieTypes数据
       let ret = ``
       for (let i = 0; i < args.length; i++) {
         ret += `${i !== 0 ? '/' : ''}${args[i]}` 
@@ -143,6 +144,16 @@ export default {
  }
  .movie-detail .content .flex.xs2{
    background: rgba(79, 73, 68,0.6);
+   position: relative;
+ }
+ .movie-detail .content .flex.xs2 .back{
+   text-decoration: none;
+   position: absolute;
+   right: 10px;
+   top: 14px;
+   z-index: 99;
+   color:white;
+   font-weight: bold;
  }
  .movie-detail .content .flex.xs2 .tab-title .tabs__item{
    color: white !important;

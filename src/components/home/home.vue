@@ -57,6 +57,18 @@ export default {
     ...mapMutations([
       'tabVideo'
     ])
+  },
+  watch: {
+    $route(newRoute) { // 切换分类
+      if (newRoute.query.year || newRoute.query.type) {
+        axios.get('/api/v0/movies', {
+          params: newRoute.query
+        }).then(res => {
+          console.log(res)
+          this.recommandList = res.data.movies
+        })
+      }
+    }
   }
 }
 </script>

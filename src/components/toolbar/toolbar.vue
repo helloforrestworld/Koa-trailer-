@@ -7,7 +7,7 @@
       app
     >
       <v-list dense>
-        <v-list-tile v-for="item in items" :key="item.text" @click="">
+        <v-list-tile v-for="item in types" :key="item.text" @click="filterMovie({type: item.text})">
           <v-list-tile-action>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-tile-action>
@@ -17,13 +17,13 @@
             </v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
-        <v-subheader class="mt-3 grey--text text--darken-1">SUBSCRIPTIONS</v-subheader>
+        <v-subheader class="mt-3 grey--text text--darken-1">年份</v-subheader>
         <v-list>
-          <v-list-tile v-for="item in items2" :key="item.text" avatar @click="">
+          <v-list-tile v-for="item in years" :key="item.year" avatar @click="filterMovie({year: item.year})">
             <v-list-tile-avatar>
               <img :src="`https://randomuser.me/api/portraits/men/${item.picture}.jpg`" alt="">
             </v-list-tile-avatar>
-            <v-list-tile-title v-text="item.text"></v-list-tile-title>
+            <v-list-tile-title v-text="item.year + '上映'"></v-list-tile-title>
           </v-list-tile>
         </v-list>
         <v-list-tile class="mt-3" @click="">
@@ -72,19 +72,22 @@ export default {
   data() {
     return {
       drawer: true, // 默认打开左侧导航
-      items: [
-        { icon: 'trending_up', text: '悬疑' },
+      types: [
+        { icon: 'trending_up', text: '恐怖' },
         { icon: 'subscriptions', text: '惊悚' },
-        { icon: 'history', text: '搞笑' },
-        { icon: 'featured_play_list', text: '动作' },
-        { icon: 'watch_later', text: '剧情' }
+        { icon: 'history', text: '喜剧' },
+        { icon: 'featured_play_list', text: '爱情' },
+        { icon: 'watch_later', text: '剧情' },
+        { icon: 'watch_later', text: '动画' },
+        { icon: 'watch_later', text: '冒险' },
+        { icon: 'watch_later', text: '家庭' }
       ],
-      items2: [
-        { picture: 28, text: '2018上映' },
-        { picture: 38, text: '2019上映' },
-        { picture: 48, text: '2020上映' },
-        { picture: 58, text: '2021上映' },
-        { picture: 78, text: '2022上映' }
+      years: [
+        { picture: 28, year: 2018 },
+        { picture: 38, year: 2019 },
+        { picture: 48, year: 2020 },
+        { picture: 58, year: 2021 },
+        { picture: 78, year: 2022 }
       ]
     }
   },
@@ -96,6 +99,18 @@ export default {
         this.drawer = true
       }
     })
+  },
+  methods: {
+    filterMovie(opt) { // 切换分类
+      let path = `/?`
+      if (opt.year) {
+        path += `year=${opt.year}`
+      }
+      if (opt.type) {
+        path += `type=${opt.type}`
+      }
+      this.$router.push(path)
+    }
   },
   watch: {
     $route(newRoute) {
