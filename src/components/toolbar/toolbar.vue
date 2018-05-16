@@ -80,13 +80,23 @@ export default {
         { icon: 'watch_later', text: '剧情' }
       ],
       items2: [
-        { picture: 28, text: 'Joseph' },
-        { picture: 38, text: 'Apple' },
-        { picture: 48, text: 'Xbox Ahoy' },
-        { picture: 58, text: 'Nokia' },
-        { picture: 78, text: 'MKBHD' }
+        { picture: 28, text: '2018上映' },
+        { picture: 38, text: '2019上映' },
+        { picture: 48, text: '2020上映' },
+        { picture: 58, text: '2021上映' },
+        { picture: 78, text: '2022上映' }
       ]
     }
+  },
+  mounted() {
+    this.$nextTick(() => {
+      if (this.$route.path !== '/') { // 左边导航收起
+        this.drawer = false
+      } else {
+        console.log(this.$route.path)
+        this.drawer = true
+      }
+    })
   },
   watch: {
     $route(newRoute) {

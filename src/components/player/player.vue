@@ -45,6 +45,9 @@ export default {
       this.dp.on('fullscreen_cancel', () => {
         this.$refs.dplayer.style.height = ''
       })
+      
+      // 播放器显示按钮
+      this.toggleBtn(this.$route)
     })
   },
   computed: {
@@ -63,15 +66,18 @@ export default {
       )
     },
     $route(newRoute) {
+      this.toggleBtn(newRoute)
+    }
+  },
+  methods: {
+    toggleBtn(route) { // 播放器按钮只在首页显示
       const btnShowPlayer = this.$refs.btnShowPlayer
-      if (newRoute.path !== '/') { // 播放器按钮收起
+      if (route.path !== '/') {
         btnShowPlayer.$el.style.display = 'none'
       } else {
         btnShowPlayer.$el.style.display = ''
       }
     }
-  },
-  methods: {
   }
 }
 </script>
