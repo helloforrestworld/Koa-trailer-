@@ -9,6 +9,22 @@ exports.initSchemas = () => { // 同步加载所有schema方法
   glob.sync(resolve(__dirname, './schema', '**/*.js')).forEach(require)
 }
 
+exports.initUser = async () => {
+  const User = mongoose.model('User')
+  let user = await User.findOne({
+    username: 'Forrest'
+  })
+  if (!user) {
+     user = new User({
+      username: 'Forrest',
+      email: 'admin@qq.com',
+      password: '123456',
+      role: 'admin'
+    })
+    await user.save()
+  }
+}
+
 exports.connect = () => {
   
   return new Promise((resolve, reject) => {

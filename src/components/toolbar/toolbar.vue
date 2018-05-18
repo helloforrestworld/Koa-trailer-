@@ -30,13 +30,7 @@
           <v-list-tile-action>
             <v-icon color="grey darken-1">add_circle_outline</v-icon>
           </v-list-tile-action>
-          <v-list-tile-title class="grey--text text--darken-1">Browse Channels</v-list-tile-title>
-        </v-list-tile>
-        <v-list-tile @click="">
-          <v-list-tile-action>
-            <v-icon color="grey darken-1">settings</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-title class="grey--text text--darken-1">Manage Subscriptions</v-list-tile-title>
+          <v-list-tile-title class="grey--text text--darken-1">给老陈的美剧</v-list-tile-title>
         </v-list-tile>
       </v-list>
     </v-navigation-drawer>
@@ -48,8 +42,8 @@
       app
     >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
-      <v-icon class="mx-3">fab fa-youtube</v-icon>
-      <v-toolbar-title class="mr-5 align-center">
+      <v-icon class="mx-3"></v-icon>
+      <v-toolbar-title class="mr-5 align-center head-title" @click="backHome">
         <span class="title">看个片啥的</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
@@ -63,6 +57,7 @@
           hide-details
         ></v-text-field>
       </v-layout>
+      <v-icon class="mx-3 user" @click="goLogin">fas fa-user</v-icon>
     </v-toolbar>
   </div>
 </template>
@@ -73,14 +68,14 @@ export default {
     return {
       drawer: true, // 默认打开左侧导航
       types: [
-        { icon: 'trending_up', text: '恐怖' },
-        { icon: 'subscriptions', text: '惊悚' },
-        { icon: 'history', text: '喜剧' },
-        { icon: 'featured_play_list', text: '爱情' },
+        { icon: 'fab fa-drupal', text: '恐怖' },
+        { icon: 'fas fa-eye', text: '惊悚' },
+        { icon: 'far fa-smile', text: '喜剧' },
+        { icon: 'fab fa-gratipay', text: '爱情' },
         { icon: 'watch_later', text: '剧情' },
-        { icon: 'watch_later', text: '动画' },
-        { icon: 'watch_later', text: '冒险' },
-        { icon: 'watch_later', text: '家庭' }
+        { icon: 'fab fa-fort-awesome-alt', text: '动画' },
+        { icon: 'fas fa-car', text: '冒险' },
+        { icon: 'fas fa-home', text: '家庭' }
       ],
       years: [
         { picture: 28, year: 2018 },
@@ -110,6 +105,12 @@ export default {
         path += `type=${opt.type}`
       }
       this.$router.push(path)
+    },
+    backHome() {
+      this.$router.push('/')
+    },
+    goLogin() {
+      this.$router.push('/login')
     }
   },
   watch: {
@@ -124,4 +125,10 @@ export default {
 }
 </script>
 <style>
+.head-title .title{
+  cursor: pointer;
+}
+.user{
+  cursor: pointer;
+}
 </style>
