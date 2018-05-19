@@ -27,6 +27,10 @@ const userSchema = new Schema({
     require: true,
     default: 0
   },
+  role: {
+    type: String,
+    default: 'user'
+  },
   meta: {
     createdAt: { // 信息创建时间
       type: Date,
@@ -53,19 +57,17 @@ userSchema.pre('save', function (next) { // 保存一条数据前
 })
 userSchema.pre('save', function (next) { // 保存一条数据前
   if (!this.isModified('password')) return next() // 密码没被修改
-  
   // 加密处理
   bcrypt.genSalt(SALT_WORK_FACTOR, (err, salt) => { // 加盐
     if (err) return next(err)
     
     bcrypt.hash(this.password, salt, (error, hash) => { // 盐 + hash
       if (error) return next(err)
-      
+      console.log('bcrypt:'+ hash)
       this.password = hash // 设置密码
       next()
     })
   })
-  next()
 })
 
 userSchema.methods = { // 增加实例方法

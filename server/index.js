@@ -3,9 +3,9 @@ const app = new koa()
 const logger = require('koa-logger')
 const {resolve} = require('path')
 const mongoose = require('mongoose')
-const {connect, initSchemas} = require('./database/init')
+const {connect, initSchemas, initUser} = require('./database/init')
 const R = require('ramda')
-const MIDDLEWARES = ['router', 'parcel']
+const MIDDLEWARES = ['common', 'router', 'parcel']
 
 // 加载中间件数组
 const useMiddlewares = (app) => {
@@ -24,12 +24,12 @@ const useMiddlewares = (app) => {
   await connect() // 连接数据库
   
   initSchemas() // 初始化schema
+  await initUser() // 初始Forrest用户
   
   // require('./tasks/movie.js') // 启用movie.js爬虫脚本
   // require('./tasks/api.js') // 通过豆瓣请求详细数据
   // require('./tasks/trailer.js') // 封面图和预告片视频地址
   // require('./tasks/qiniu.js') // 七牛存储静态资源
-  app.use(logger())
   
   await useMiddlewares(app)
   

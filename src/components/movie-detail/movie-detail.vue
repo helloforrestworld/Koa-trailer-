@@ -50,7 +50,7 @@
                   <template v-for="(item, index) in relativeMovies">
                     <v-list-tile avatar @click="tabRelative(item)">
                       <v-list-tile-avatar>
-                        <img :src="addBase(item.posterKey)">
+                        <img :src="addBase(item, 'poster')">
                       </v-list-tile-avatar>
                       <v-list-tile-content>
                         <v-list-tile-title v-html="item.title"></v-list-tile-title>
@@ -113,9 +113,9 @@ export default {
       })
     },
     tabVideo(item) { // 切换视频源
-      const url = this.addBase(item.videoKey)
-      const pic = this.addBase(item.coverKey)
-      const thumbnails = this.addBase(item.posterKey)
+      const url = this.addBase(item, 'video')
+      const pic = this.addBase(item, 'cover')
+      const thumbnails = this.addBase(item, 'poster')
       this.dp.switchVideo(
         { url, pic, thumbnails }
       )

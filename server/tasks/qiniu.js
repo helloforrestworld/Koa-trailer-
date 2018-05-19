@@ -1,7 +1,7 @@
 // 上传数据到七牛图床
 
 const qiniu = require('qiniu')
-const nanoid = require('nanoid') // 生成随机ID作为静态资源文件名
+export const nanoid = require('nanoid') // 生成随机ID作为静态资源文件名
 const config = require('../config')
 const mongoose = require('mongoose')
 
@@ -14,8 +14,9 @@ const client = new qiniu.rs.BucketManager(mac, cfg)
 
 const Movie = mongoose.model('Movie')
 
+
 // 七牛download数据方法
-const uploadToQiniu = async (url, key) => { 
+export const uploadToQiniu = async (url, key) => { 
   return new Promise((resolve, reject) => {
     client.fetch(url, bucket, key, (err, ret, info) => {
       if (err) {
@@ -37,7 +38,8 @@ const uploadToQiniu = async (url, key) => {
     $or: [
       {videoKey: {$exists: false}},
       {videoKey: null},
-      {videoKey: ''}
+      {videoKey: ''},
+      {uptoQiniu: true}
     ]
   }).exec()
   

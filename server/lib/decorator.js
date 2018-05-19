@@ -2,6 +2,7 @@ const Router = require('koa-router')
 const glob = require('glob')
 const {resolve} = require('path')
 const _ = require('lodash')
+const R = require('ramda')
 
 const symbolPrefix = Symbol('prefix')
 const routerMap = new Map()
@@ -58,26 +59,100 @@ export const get = path => router({
 })
 
 export const post = path => router({
-  method: 'get',
+  method: 'post',
   path: path
 })
 
-export const put = path => router({ // 修改已有的
-  method: 'get',
+export const put = path => router({
+  method: 'put',
   path: path
 })
 
 export const del = path => router({
-  method: 'get',
+  method: 'delete',
   path: path
 })
 
-export const use = path => router({ // router使用某些中间件
-  method: 'get',
-  path: path
+// const changeToArr = R.unless(
+//   R.is(isArray),
+//   R.of
+// )
+
+// const convert = middleware => (target, key, descriptor) => {
+//   return (target, key, descriptor) => {
+//     target[key] = R.compose(
+//       R.concat(
+//         changeToArr(middleware)
+//       ),
+//       changeToArr
+//     )(target[key])
+//     return descriptor
+//   }
+// }
+
+
+const decorate = (args, middleware) => {
+  let [target, key, descriptor] = args
+
+  target[key] = isArray(target[key])
+  target[key].unshift(middleware)
+
+  return descriptor
+}
+
+const convert = middleware => (...args) => decorate(args, middleware)
+
+export const auth = convert (async (ctx, next) => {
+  if (!ctx.session.user) {
+    return (
+      ctx.body = {
+        success: false,
+        code: 401,
+        err: '登录信息失效,重新登录'
+      }
+    )
+  }
+  await next()
 })
 
-export const all = path => router({ // 处理所有的请求
-  method: 'get',
-  path: path
+export const admin = roleExpected => convert (async (ctx, next) => {
+  const { role } = ctx.session.user
+  
+  console.log(role)
+  
+  if (!role || role !== roleExpected  ) {
+    return (
+      ctx.body = {
+        success: false,
+        code: 403,
+        err: '权限不足'
+      }
+    )
+  }
+  await next()
+})
+
+export const required = paramsObj => convert(async (ctx, next) => {
+  let errs = []
+
+  R.forEachObjIndexed(
+    (val, key) => {
+      errs = errs.concat(
+        R.filter(
+          name => !R.has(name, ctx.request[key])
+        )(val)
+      )
+    }
+  )(paramsObj)
+
+  if (!R.isEmpty(errs)) {
+    return (
+      ctx.body = {
+        success: false,
+        errCode: 412,
+        errMsg: `${R.join(', ', errs)} is required`
+      }
+    )
+  }
+  await next()
 })

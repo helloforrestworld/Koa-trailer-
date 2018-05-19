@@ -1,0 +1,286 @@
+<template>
+  <div class="management">
+    <v-dialog v-model="dialog" max-width="500px">
+      <v-btn slot="activator" color="green" dark class="mb-2 add-file" @click="newItem">新建</v-btn>
+      <v-card>
+        <v-card-title>
+          <span class="headline">{{ formTitle }}</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container grid-list-md>
+            <v-layout wrap>
+              <v-flex xs12 sm6 md4>
+                <v-text-field v-model="editedItem.title" label="标题"></v-text-field>
+              </v-flex>
+              <v-flex xs12 sm6 md4>
+                <v-text-field v-model="editedItem.video" label="视频地址"></v-text-field>
+              </v-flex>
+              <v-flex xs12 sm6 md4>
+                <v-text-field v-model="editedItem.poster" label="海报地址"></v-text-field>
+              </v-flex>
+              <v-flex xs12 sm6 md4>
+                <v-text-field v-model="editedItem.year" label="上映年份"></v-text-field>
+              </v-flex>
+              <v-flex xs12 sm6 md4>
+                <v-text-field v-model="editedItem.rate" label="评分"></v-text-field>
+              </v-flex>
+              <v-flex lg12 xs12 sm12 md12>
+                <v-select
+                  :items="people"
+                  v-model="editedItem.movieTypes"
+                  label="分类"
+                  item-text="name"
+                  item-value="name"
+                  multiple
+                  chips
+                  max-height="auto"
+                  autocomplete
+                >
+                  <template slot="selection" slot-scope="data">
+                    <v-chip
+                      :selected="data.selected"
+                      :key="JSON.stringify(data.item)"
+                      close
+                      class="chip--select-multi"
+                      @input="data.parent.selectItem(data.item)"
+                    >
+                      <v-avatar>
+                        <img>
+                      </v-avatar>
+                      {{ data.item.name }}
+                    </v-chip>
+                  </template>
+                  <template slot="item" slot-scope="data">
+                    <template v-if="typeof data.item !== 'object'">
+                      <v-list-tile-content v-text="data.item"></v-list-tile-content>
+                    </template>
+                    <template v-else>
+                      <v-list-tile-avatar>
+                        <img :src="data.item.avatar">
+                      </v-list-tile-avatar>
+                      <v-list-tile-content>
+                        <v-list-tile-title v-html="data.item.name"></v-list-tile-title>
+                        <v-list-tile-sub-title v-html="data.item.group"></v-list-tile-sub-title>
+                      </v-list-tile-content>
+                    </template>
+                  </template>
+                </v-select>
+              </v-flex>
+              <v-flex>
+                <v-switch
+                  :label="`同步到七牛云: ${editedItem.uptoQiniu.toString()}`"
+                  v-model="editedItem.uptoQiniu"
+                >
+                </v-switch>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" flat @click.native="close">Cancel</v-btn>
+          <v-btn color="green darken-1" flat @click.native="save">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+    <v-data-table
+      :headers="headers"
+      :items="manageList"
+      hide-actions
+      class="data-table"
+    >
+      <template slot="items" slot-scope="props">
+        <td>
+          <v-card>
+            <v-card-media :src="addBase(props.item, 'poster')" height="200">
+            </v-card-media>
+          </v-card>
+        </td>
+        <td class="text-xs-left">{{ props.item.title }}</td>
+        <td class="text-xs-left">{{ parseFloat(props.item.rate) }}</td>
+        <td class="text-xs-left">{{ formateDate(props.item.meta.updatedAt) }}</td>
+        <td class="text-xs-left">{{ formateDate(props.item.meta.createdAt) }}</td>
+        <td class="text-xs-left">
+          <v-btn icon class="mx-0" @click="editItem(props.item)">
+            <v-icon color="teal">edit</v-icon>
+          </v-btn>
+          <v-btn icon class="mx-0" @click="deleteItem(props.item)">
+            <v-icon color="pink">delete</v-icon>
+          </v-btn>
+        </td>
+      </template>
+      <template slot="no-data">
+        <v-btn color="primary" @click="">Reset</v-btn>
+      </template>
+    </v-data-table>
+  </div>
+</template>
+
+<script>
+import axios from 'axios'
+import {baseUrlMixin} from '../../common/js/mixin.js'
+
+export default {
+  name: 'management',
+  mixins: [baseUrlMixin],
+  data() {
+    return {
+      manageList: [],
+      dialog: false,
+      headers: [
+        {
+          text: '海报',
+          align: 'left',
+          sortable: false,
+          value: 'name'
+        },
+        { text: '名字', value: 'title' },
+        { text: '评分', value: 'rate' },
+        { text: '修改时间', value: 'meta.updatedAt' },
+        { text: '添加时间', value: 'meta.createdAt' },
+        { text: '操作', value: 'name', sortable: false }
+      ],
+      editedIndex: -1,
+      editedItem: {
+        "title": "",
+        "rate": 0,
+        "video": "",
+        "cover": "",
+        "poster": "",
+        "summary": "简介",
+        "year": 2018,
+        "tags": ["新添加的"],
+        "movieTypes": [],
+        "uptoQiniu": false,
+        "pubdate": [{
+            "date": "2018-04-13T00:00:00.000Z",
+            "country": "中国大陆"
+        }]
+      },
+      defaultItem: {
+        "title": "",
+        "rate": 0,
+        "video": "",
+        "cover": "",
+        "poster": "",
+        "summary": "简介",
+        "year": 2018,
+        "tags": ["新添加的"],
+        "movieTypes": [],
+        "uptoQiniu": false,
+        "pubdate": [{
+            "date": "2018-04-13T00:00:00.000Z",
+            "country": "中国大陆"
+        }]
+      },
+      movieTypes: [],
+       people: [
+         { header: '类别' },
+         { name: '恐怖', group: '类别'},
+         { name: '惊悚', group: '类别'},
+         { name: '喜剧', group: '类别'},
+         { name: '爱情', group: '类别'},
+         { name: '剧情', group: '类别'},
+         { name: '动画', group: '类别'},
+         { name: '冒险', group: '类别'},
+         { name: '家庭', group: '类别'},
+         { name: '其他', group: '类别'},
+         { divider: true },
+         { header: '私人专用' },
+         { name: '给老陈的美剧', group: '私人专用'},
+       ]
+    }
+  },
+
+  computed: {
+    formTitle () {
+      return this.editedIndex === -1 ? '添加电影' : '编辑电影'
+    }
+  },
+
+  watch: {
+    dialog (val) {
+      val || this.close()
+    }
+  },
+
+  created () {
+    this.initData() // 所有电影数据
+  },
+
+  methods: {
+    initData() { // 所有电影数据
+      axios.get('/admin/movie/list').then(res => {
+        this.manageList = res.data.movies
+      })
+    },
+    formateDate(date) {
+      let newDate = new Date(date)
+      let year = newDate.getFullYear()
+      let month = this.addZero(newDate.getMonth() + 1)
+      let theDate = this.addZero(newDate.getDate())
+      let hour  = this.addZero(newDate.getHours())
+      let min = this.addZero(newDate.getMinutes())
+      let sec = this.addZero(newDate.getSeconds())
+      let ret = year + '/' + month + '/' + theDate + ' | | ' + hour+ ':' + min + ':' + sec
+      return ret
+    },
+    addZero(d) {
+      d = d.toString()
+      return d.length < 2 ? '0' + d : d
+    },
+    newItem() {
+      this.dialog = true
+      this.editedIndex = -1
+      this.editedItem = this.defaultItem
+      this.editedItem.doubanId = 'new' + Date.now()
+    },
+    editItem (item) {
+      this.editedItem._id = item._id
+      this.editedItem.doubanId = 'new' + Date.now()
+      for (let key in this.editedItem) {
+        this.editedItem[key] = item[key]
+      }
+      this.dialog = true
+      this.editedIndex = 0
+    },
+    deleteItem (item) {
+      let confirm =  window.confirm('确定要删除' + item.title + '吗')
+      if (confirm) {
+        axios.delete(`admin/movies/?id=${item._id}`)
+          .then(res => {
+            this.manageList = res.data.data
+          })
+      }
+    },
+    close () {
+      this.dialog = false
+    },
+    save () {
+      this.editedItem.cover = this.editedItem.poster
+      this.editedItem.pubdate[0].date = new Date(new Date().setYear(this.editedItem.year))
+      axios.post('/admin/upload', {
+        movie: this.editedItem
+      }).then(res => {
+        this.manageList = res.data.data
+        console.log(this.manageList)
+      })
+      this.close()
+    }
+  }
+}
+</script>
+
+
+<style media="screen">
+.management .data-table thead{
+  background: rgb(5, 147, 130);
+}
+.management .data-table .text-xs-left{
+  font-size: 18px !important;
+}
+.management .data-table .card__media__content{
+  width: 200px !important;
+}
+
+</style>
