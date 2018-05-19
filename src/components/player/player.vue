@@ -58,9 +58,9 @@ export default {
   watch: {
     playingItem(newData) { // 预告片数据变化
       this.sheet = true
-      const url = this.addBase(newData.videoKey)
-      const pic = this.addBase(newData.coverKey)
-      const thumbnails = this.addBase(newData.posterKey)
+      const url = this.addBase(newData, 'video')
+      const pic = this.addBase(newData, 'cover')
+      const thumbnails = this.addBase(newData, 'poster')
       this.dp.switchVideo(
         { url, pic, thumbnails }
       )

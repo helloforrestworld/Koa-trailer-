@@ -1,7 +1,11 @@
 export const baseUrlMixin = {
   methods: {
-    addBase(key) {
-      return 'http://qiniumovie.hasakei66.com/' + key
+    addBase(item, type) {
+      let key = item[`${type}Key`]
+      if (!key) {
+        return item[type]
+      }
+      return `http://qiniumovie.hasakei66.com/${key}`
     }
   }
 }

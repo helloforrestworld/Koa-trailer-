@@ -30,6 +30,11 @@ const movieSchema = new Schema({
   
   tags: Array,
   
+  uptoQiniu: {
+    type: Boolean,
+    default: true
+  },
+  
   meta: {
     createdAt: { // 信息创建时间
       type: Date,

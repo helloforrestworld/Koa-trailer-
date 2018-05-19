@@ -10,19 +10,68 @@
           <v-container grid-list-md>
             <v-layout wrap>
               <v-flex xs12 sm6 md4>
-                <v-text-field v-model="editedItem.name" label="Dessert name"></v-text-field>
+                <v-text-field v-model="editedItem.title" label="标题"></v-text-field>
               </v-flex>
               <v-flex xs12 sm6 md4>
-                <v-text-field v-model="editedItem.calories" label="Calories"></v-text-field>
+                <v-text-field v-model="editedItem.video" label="视频地址"></v-text-field>
               </v-flex>
               <v-flex xs12 sm6 md4>
-                <v-text-field v-model="editedItem.fat" label="Fat (g)"></v-text-field>
+                <v-text-field v-model="editedItem.poster" label="海报地址"></v-text-field>
               </v-flex>
               <v-flex xs12 sm6 md4>
-                <v-text-field v-model="editedItem.carbs" label="Carbs (g)"></v-text-field>
+                <v-text-field v-model="editedItem.year" label="上映年份"></v-text-field>
               </v-flex>
               <v-flex xs12 sm6 md4>
-                <v-text-field v-model="editedItem.protein" label="Protein (g)"></v-text-field>
+                <v-text-field v-model="editedItem.rate" label="评分"></v-text-field>
+              </v-flex>
+              <v-flex lg12 xs12 sm12 md12>
+                <v-select
+                  :items="people"
+                  v-model="editedItem.movieTypes"
+                  label="分类"
+                  item-text="name"
+                  item-value="name"
+                  multiple
+                  chips
+                  max-height="auto"
+                  autocomplete
+                >
+                  <template slot="selection" slot-scope="data">
+                    <v-chip
+                      :selected="data.selected"
+                      :key="JSON.stringify(data.item)"
+                      close
+                      class="chip--select-multi"
+                      @input="data.parent.selectItem(data.item)"
+                    >
+                      <v-avatar>
+                        <img>
+                      </v-avatar>
+                      {{ data.item.name }}
+                    </v-chip>
+                  </template>
+                  <template slot="item" slot-scope="data">
+                    <template v-if="typeof data.item !== 'object'">
+                      <v-list-tile-content v-text="data.item"></v-list-tile-content>
+                    </template>
+                    <template v-else>
+                      <v-list-tile-avatar>
+                        <img :src="data.item.avatar">
+                      </v-list-tile-avatar>
+                      <v-list-tile-content>
+                        <v-list-tile-title v-html="data.item.name"></v-list-tile-title>
+                        <v-list-tile-sub-title v-html="data.item.group"></v-list-tile-sub-title>
+                      </v-list-tile-content>
+                    </template>
+                  </template>
+                </v-select>
+              </v-flex>
+              <v-flex>
+                <v-switch
+                  :label="`同步到七牛云: ${editedItem.uptoQiniu.toString()}`"
+                  v-model="editedItem.uptoQiniu"
+                >
+                </v-switch>
               </v-flex>
             </v-layout>
           </v-container>
@@ -43,7 +92,7 @@
       <template slot="items" slot-scope="props">
         <td>
           <v-card>
-            <v-card-media :src="addBase(props.item.posterKey)" height="200">
+            <v-card-media :src="addBase(props.item, 'poster')" height="200">
             </v-card-media>
           </v-card>
         </td>
@@ -93,19 +142,53 @@ export default {
       ],
       editedIndex: -1,
       editedItem: {
-        title: '',
-        rate: 0,
-        url: 0,
-        carbs: 0,
-        protein: 0
+        "title": "",
+        "rate": 0,
+        "video": "",
+        "cover": "",
+        "poster": "",
+        "summary": "简介",
+        "year": 2018,
+        "tags": ["新添加的"],
+        "movieTypes": [],
+        "uptoQiniu": false,
+        "pubdate": [{
+            "date": "2018-04-13T00:00:00.000Z",
+            "country": "中国大陆"
+        }]
       },
       defaultItem: {
-        title: '22',
-        calories: 0,
-        fat: 0,
-        carbs: 0,
-        protein: 0
-      }
+        "title": "",
+        "rate": 0,
+        "video": "",
+        "cover": "",
+        "poster": "",
+        "summary": "简介",
+        "year": 2018,
+        "tags": ["新添加的"],
+        "movieTypes": [],
+        "uptoQiniu": false,
+        "pubdate": [{
+            "date": "2018-04-13T00:00:00.000Z",
+            "country": "中国大陆"
+        }]
+      },
+      movieTypes: [],
+       people: [
+         { header: '类别' },
+         { name: '恐怖', group: '类别'},
+         { name: '惊悚', group: '类别'},
+         { name: '喜剧', group: '类别'},
+         { name: '爱情', group: '类别'},
+         { name: '剧情', group: '类别'},
+         { name: '动画', group: '类别'},
+         { name: '冒险', group: '类别'},
+         { name: '家庭', group: '类别'},
+         { name: '其他', group: '类别'},
+         { divider: true },
+         { header: '私人专用' },
+         { name: '给老陈的美剧', group: '私人专用'},
+       ]
     }
   },
 
@@ -149,8 +232,15 @@ export default {
     newItem() {
       this.dialog = true
       this.editedIndex = -1
+      this.editedItem = this.defaultItem
+      this.editedItem.doubanId = 'new' + Date.now()
     },
     editItem (item) {
+      this.editedItem._id = item._id
+      this.editedItem.doubanId = 'new' + Date.now()
+      for (let key in this.editedItem) {
+        this.editedItem[key] = item[key]
+      }
       this.dialog = true
       this.editedIndex = 0
     },
@@ -160,23 +250,21 @@ export default {
         axios.delete(`admin/movies/?id=${item._id}`)
           .then(res => {
             this.manageList = res.data.data
-            console.log(res.data.data)
           })
       }
     },
     close () {
       this.dialog = false
-      // setTimeout(() => {
-      //   this.editedItem = Object.assign({}, this.defaultItem)
-      //   this.editedIndex = -1
-      // }, 300)
     },
     save () {
-      // if (this.editedIndex > -1) {
-      //   Object.assign(this.desserts[this.editedIndex], this.editedItem)
-      // } else {
-      //   this.desserts.push(this.editedItem)
-      // }
+      this.editedItem.cover = this.editedItem.poster
+      this.editedItem.pubdate[0].date = new Date(new Date().setYear(this.editedItem.year))
+      axios.post('/admin/upload', {
+        movie: this.editedItem
+      }).then(res => {
+        this.manageList = res.data.data
+        console.log(this.manageList)
+      })
       this.close()
     }
   }

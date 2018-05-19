@@ -5,7 +5,7 @@
         <v-layout space-around row wrap>
           <v-flex v-for="(item, index) in recommandList" class="mt-5 mr-3" @click="checkDeatil(item)">
            <v-card class="card">
-             <v-card-media :src="addBase(item.posterKey)" height="200px">
+             <v-card-media :src="addBase(item, 'poster')" height="200px">
              </v-card-media>
              <v-card-title primary-title>
                <div>
@@ -80,6 +80,7 @@ export default {
 <style>
   .home .content .card .summary{
     max-width: 300px;
+    min-height: 105px;
     overflow: hidden;
   }
   .home .content .card {

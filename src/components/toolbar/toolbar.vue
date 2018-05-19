@@ -30,7 +30,10 @@
           <v-list-tile-action>
             <v-icon color="grey darken-1">add_circle_outline</v-icon>
           </v-list-tile-action>
-          <v-list-tile-title class="grey--text text--darken-1">给老陈的美剧</v-list-tile-title>
+          <v-list-tile-title 
+            class="grey--text text--darken-1"
+            @click="filterMovie({type: '给老陈的美剧'})"
+          >给老陈的美剧</v-list-tile-title>
         </v-list-tile>
       </v-list>
     </v-navigation-drawer>
@@ -75,7 +78,8 @@ export default {
         { icon: 'watch_later', text: '剧情' },
         { icon: 'fab fa-fort-awesome-alt', text: '动画' },
         { icon: 'fas fa-car', text: '冒险' },
-        { icon: 'fas fa-home', text: '家庭' }
+        { icon: 'fas fa-home', text: '家庭' },
+        { icon: 'gavel', text: '其他' }
       ],
       years: [
         { picture: 28, year: 2018 },

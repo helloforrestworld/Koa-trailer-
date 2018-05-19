@@ -13,7 +13,8 @@ const {
 } = require('../service/user')
 const {
   getAllMovies,
-  findAndRemove
+  findAndRemove,
+  fetchAndSave
 } = require('../service/movie')
 
 @controller('/admin')
@@ -74,5 +75,20 @@ export class adminController {
       success: false,
       err: '用户或密码错误'
     })
+  }
+  
+  @post('/upload') // 添加电影
+  @required({
+    body: ['movie']
+  })
+  async upload (ctx, next) {
+    const movie = ctx.request.body.movie
+    await fetchAndSave(movie)
+    const movies = await getAllMovies()
+    
+    ctx.body = {
+      data: movies,
+      success: true
+    }
   }
 }
