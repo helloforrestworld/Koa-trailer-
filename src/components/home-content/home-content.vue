@@ -1,5 +1,8 @@
 <template>
   <div class="home">
+    <div class="loading-container" v-if="!recommandList.length">
+      <v-progress-circular :width="3" :size="50" indeterminate color="amber"></v-progress-circular>
+    </div>
     <v-content class="content">
       <v-container fluid fill-height>
         <v-layout space-around row wrap>
@@ -85,5 +88,12 @@ export default {
   }
   .home .content .card {
     height: 460px !important;
+  }
+  .home .loading-container{
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
   }
 </style>
