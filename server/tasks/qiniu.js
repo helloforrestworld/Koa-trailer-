@@ -1,7 +1,7 @@
 // 上传数据到七牛图床
 
 const qiniu = require('qiniu')
-export const nanoid = require('nanoid') // 生成随机ID作为静态资源文件名
+const nanoid = require('nanoid') // 生成随机ID作为静态资源文件名
 const config = require('../config')
 const mongoose = require('mongoose')
 
@@ -16,7 +16,7 @@ const Movie = mongoose.model('Movie')
 
 
 // 七牛download数据方法
-export const uploadToQiniu = async (url, key) => { 
+const uploadToQiniu = async (url, key) => { 
   return new Promise((resolve, reject) => {
     client.fetch(url, bucket, key, (err, ret, info) => {
       if (err) {
@@ -32,45 +32,84 @@ export const uploadToQiniu = async (url, key) => {
   })
 }
 
+// 七牛删除数据方法
+const deleteFromQiniu = async (key) => {
+  return new Promise((resolve, reject) => {
+    client.delete(bucket, key, (err, ret, info) => {
+      if (err) {
+        reject(err)
+      } else {
+        console.log(info.statusCode)
+        resolve(ret)
+      }
+    })
+  })
+}
+
+
 // 开始上传数据
-;(async () => {
-  let movies = await Movie.find({
-    $or: [
-      {videoKey: {$exists: false}},
-      {videoKey: null},
-      {videoKey: ''},
-      {uptoQiniu: true}
-    ]
-  }).exec()
-  
-  for (let i = 0; i < movies.length; i ++) {
-    let movie = movies[i]
-    if (movie.video && !movie.key) {
+const init = async function init(movie, whichChange){
+  return new Promise( async (resolve, reject) => {
+    let movies = []
+    if (!movie) { // 批量上传
+      movies = await Movie.find({
+        $or: [
+          {videoKey: {$exists: false}},
+          {videoKey: null},
+          {videoKey: ''}
+        ],
+        uptoQiniu: true
+      }).exec()
+    } else {
+      if (movie.uptoQiniu) movies.push(movie)
+    }
+    
+    for (let i = 0; i < movies.length; i ++) {
+      let movie = movies[i]
       try {
-        console.log('准备获取并上传video')
-        let videoData = await uploadToQiniu(movie.video, nanoid() + '.mp4')
-        console.log('准备获取并上传cover')
-        let coverData = await uploadToQiniu(movie.cover, nanoid() + '.png')
-        console.log('准备获取并上传poster')
-        let posterData = await uploadToQiniu(movie.poster, nanoid() + '.png')
+        let videoData, coverData, posterData
+        if (!movie || whichChange.video) {
+          console.log('准备获取并上传video')
+          videoData = await uploadToQiniu(movie.video, nanoid() + '.mp4')
+        }
+        if (!movie || whichChange.cover) {
+          console.log('准备获取并上传cover')
+          coverData = await uploadToQiniu(movie.cover, nanoid() + '.png')
+        }
+        if (!movie || whichChange.poster) {
+          console.log('准备获取并上传poster')
+          posterData = await uploadToQiniu(movie.poster, nanoid() + '.png')
+        }
         
-        if (videoData.key) {
+        if (videoData && videoData.key) {
+          await deleteFromQiniu(movie.videoKey)
           movie.videoKey = videoData.key
         }
-        if (coverData.key) {
+        if (coverData && coverData.key) {
+          await deleteFromQiniu(movie.coverKey)
           movie.coverKey = coverData.key
         }
-        if (posterData.key) {
+        if (posterData && posterData.key) {
+          await deleteFromQiniu(movie.posterKey)
           movie.posterKey = posterData.key
         }
         
         await movie.save()
       } catch(err) {
-        console.log(err)
+        reject(err)
       }
     }
-  }
-})()
+    resolve({success: true})
+  })
+}
+init().then((res) => {
+  console.log(res)
+}).catch((err) => {
+  console.log(err)
+})
+export default init
+
+
 
 
 

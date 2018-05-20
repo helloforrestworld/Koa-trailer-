@@ -83,12 +83,18 @@ export class adminController {
   })
   async upload (ctx, next) {
     const movie = ctx.request.body.movie
-    await fetchAndSave(movie)
-    const movies = await getAllMovies()
-    
-    ctx.body = {
-      data: movies,
-      success: true
+    const ret = await fetchAndSave(movie)
+    if (ret && ret.success) { // 上传成功
+      const movies = await getAllMovies()
+      
+      ctx.body = {
+        data: movies,
+        success: true
+      }
+    } else {
+      ctx.body = { // 上传失败
+        success: false
+      }
     }
   }
 }
