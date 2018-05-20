@@ -250,7 +250,7 @@ export default {
         axios.delete(`admin/movies/?id=${item._id}`)
           .then(res => {
             this.manageList = res.data.data
-          })
+        })
       }
     },
     close () {
@@ -262,8 +262,10 @@ export default {
       axios.post('/admin/upload', {
         movie: this.editedItem
       }).then(res => {
-        this.manageList = res.data.data
-        console.log(this.manageList)
+        if (res.data.success) {
+          this.manageList = res.data.data
+          console.log(this.manageList)
+        }
       })
       this.close()
     }

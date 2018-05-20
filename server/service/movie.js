@@ -3,6 +3,8 @@ const mongoose = require('mongoose')
 const Movie = mongoose.model('Movie')
 const Category = mongoose.model('Category')
 import {uploadToQiniu, nanoid} from '../tasks/qiniu'
+import qiniu from '../tasks/qiniu'
+import {deepCopy} from '../lib/util'
 
 export const getAllMovies =  async (type, year) => {
   let query = {}
@@ -46,11 +48,18 @@ export const findAndRemove = async (id) => {
 }
 
 export const fetchAndSave = async (item) => {
+  let whichChange = {video: true, poster: true, cover: true}
+  let rollbackMovie = {} //上传失败回滚 
   
   let movie = await Movie.findOne({_id: item._id}).exec()
-  if (movie) {
+  if (movie) { // 修改
+    whichChange.video = movie.video !== item.video
+    whichChange.poster = movie.poster !== item.poster
+    whichChange.cover = movie.cover !== item.cover
+    
+    rollbackMovie = deepCopy(movie)
     Object.assign(movie, item)
-  } else {
+  } else { // 添加
     movie = new Movie(item)
     movie.category = []
     for (let i = 0; i < movie.movieTypes.length; i++) {
@@ -75,71 +84,15 @@ export const fetchAndSave = async (item) => {
   
   await movie.save()
   
-  // console.log("item", item)
-  // let movie
-  // if (item._id) { // 修改数据
-  //   movie = await Movie.findOne({
-  //     _id: item._id
-  //   }).exec()
-  // } else { // 添加数据
-  //   movie = new Movie(item)
-  // }
-  // console.log("movie", movie)
-  // // 向七牛传数据
-  // let videoData, coverData, posterData
-  // if (movie.video !== item.video || !item._id) {
-  //   try {
-  //     console.log('准备获取并上传video')
-  //     let videoData = await uploadToQiniu(item.video, nanoid() + '.mp4')
-  //     console.log('准备获取并上传cover')
-  //     let coverData = await uploadToQiniu(item.cover, nanoid() + '.png')
-  //     console.log('准备获取并上传poster')
-  //     let posterData = await uploadToQiniu(item.poster, nanoid() + '.png')
-  // 
-  //     if (videoData.key) {
-  //       movie.videoKey = videoData.key
-  //     }
-  //     if (coverData.key) {
-  //       movie.coverKey = coverData.key
-  //     }
-  //     if (posterData.key) {
-  //       movie.posterKey = posterData.key
-  //     }
-  // 
-  //     await movie.save()
-  //   } catch(err) {
-  //     console.log(movie.cover)
-  //     console.log(err)
-  //   }
-  // }
-  // 
-  // if (item._id) {
-  //   Object.assign(movie, item)
-  // }
-  // 
-  // // 处理目录
-  // if (!movie.category)  movie.category = []
-  // for (let i = 0; i < movie.movieTypes.length; i++) {
-  //   let item = movie.movieTypes[i]
-  //   let cat = await Category.findOne({
-  //     name: item
-  //   }).exec()
-  //   if (!cat) {
-  //     cat = new Category({
-  //       name: item,
-  //       movies: [movie._id]
-  //     })
-  //   } else {
-  //     if (cat.movies.indexOf(movie._id) === -1) {
-  //       cat.movies.push(movie._id)
-  //     }
-  //   }
-  //   if (movie.category.indexOf(cat._id) === -1) {
-  //     movie.category.push(cat._id)
-  //   }
-  //   await cat.save()
-  // }
-  // 
-  // // 保存电影数据到数据库
-  // await movie.save()
+  // 同步资源到七牛
+  return await qiniu(movie, whichChange).catch( async (err) => {
+    //上传失败回滚
+    if (rollbackMovie.meta) {
+      Object.assign(movie, rollbackMovie)
+      await movie.save()
+    } else {
+      await movie.remove()
+    }
+    console.log(err)
+  })
 }

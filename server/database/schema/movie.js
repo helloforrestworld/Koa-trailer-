@@ -3,7 +3,7 @@ const Schema = mongoose.Schema
 const Mixed = Schema.Types.Mixed // mongoose的混合数据类型
 const ObjectId = Schema.Types.ObjectId 
 
-const movieSchema = new Schema({
+export const config = {
   doubanId: {
     unique: true,
     type: String
@@ -45,7 +45,9 @@ const movieSchema = new Schema({
       default: Date.now()
     }
   }
-})
+}
+
+const movieSchema = new Schema(config)
 
 movieSchema.pre('save', function (next) { // 保存一条数据前
   if (this.isNew) {
