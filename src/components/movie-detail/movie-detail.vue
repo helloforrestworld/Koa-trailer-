@@ -21,7 +21,10 @@
                 相关电影
               </v-tab>
               <v-tab-item class="moviedesc">
-                <dl v-if="movieDatail.title">
+                <div class="loading-container" v-if="!movieDatail.meta">
+                  <v-progress-circular :width="3" :size="30" indeterminate color="green"></v-progress-circular>
+                </div>
+                <dl v-if="movieDatail.meta">
                   <dt>
                     <h2>{{movieDatail.title}}</h2>
                   </dt>
@@ -46,7 +49,10 @@
                 </dl>
               </v-tab-item>
               <v-tab-item>
-                <v-list two-line>
+                <div class="loading-container" v-if="!relativeMovies.length">
+                  <v-progress-circular :width="3" :size="30" indeterminate color="green"></v-progress-circular>
+                </div>
+                <v-list two-line v-if="relativeMovies.length">
                   <template v-for="(item, index) in relativeMovies">
                     <v-list-tile avatar @click="tabRelative(item)">
                       <v-list-tile-avatar>
@@ -176,5 +182,12 @@ export default {
  }
  .movie-detail .detail-player{
    height: 100%;
+ }
+ .movie-detail .content .flex.xs2  .loading-container {
+   position: absolute;
+   left: 50%;
+   top: 50%;
+   transform: translateX(-50%);
+   z-index: 1000;
  }
 </style>

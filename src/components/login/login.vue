@@ -4,7 +4,7 @@
       <v-layout row wrap justify-center>
         <v-flex xs12 sm4>
           <v-card>
-            <v-toolbar color="teal">
+            <v-toolbar color="green">
               <v-btn icon @click="back">
                 <v-icon color="white">arrow_back</v-icon>
               </v-btn>
