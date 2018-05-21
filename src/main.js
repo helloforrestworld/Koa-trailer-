@@ -5,7 +5,7 @@ import router from './router'
 import store from './store'
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
-import 'DPlayer/dist/DPlayer.min.css';
+import 'DPlayer/dist/DPlayer.min.css'
 
 
 Vue.config.productionTip = false

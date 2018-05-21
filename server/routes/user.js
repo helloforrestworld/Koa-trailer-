@@ -26,7 +26,8 @@ export class adminController {
     const movies = await getAllMovies()
     
     ctx.body = {
-      movies
+      data: movies,
+      success: true
     }
   }
   

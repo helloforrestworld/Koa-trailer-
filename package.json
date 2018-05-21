@@ -39,7 +39,8 @@
     "cssnext": "^1.8.4",
     "nodemon": "^1.17.4",
     "parcel-bundler": "^1.8.1",
-    "parcel-plugin-vue": "^1.5.0"
+    "parcel-plugin-vue": "^1.5.0",
+    "postcss-url": "^7.3.2"
   },
   "scripts": {
     "exec": "set NODE_ENV=production&& nodemon server/start.js",

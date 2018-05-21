@@ -96,3 +96,26 @@ export const fetchAndSave = async (item) => {
     console.log(err)
   })
 }
+
+export const searchMovies = async (value) => {
+  let movies
+  try {
+    let query = {
+      $or: [
+        { title: {$regex: new RegExp(value)} },
+        { tags: {$in: [value]} },
+        { movieTypes: {$in: [value]} }
+      ]
+    }
+    if (parseInt(value)) {
+      query.$or.push(
+        { year: parseInt(value)}
+      )
+    }
+    movies = await Movie.find(query).exec()
+  } catch(err) {
+    console.log(err)
+    return {err}
+  }
+  return {movies}
+}
