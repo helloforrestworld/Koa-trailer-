@@ -32,6 +32,7 @@ async function fetchMovie(item) {
   
   for(let i = 0; i < movies.length; i++) {
     let movie = movies[i]
+    if (!movie || !movie.doubanId) continue
     let movieData = await fetchMovie(movie) // 请求豆瓣接口
     
     // 处理数据

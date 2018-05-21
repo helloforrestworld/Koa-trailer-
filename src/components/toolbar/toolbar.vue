@@ -84,10 +84,10 @@ export default {
         { icon: 'watch_later', text: '剧情' },
         { icon: 'fab fa-fort-awesome-alt', text: '动画' },
         { icon: 'fas fa-car', text: '冒险' },
-        { icon: 'fas fa-home', text: '家庭' },
-        { icon: 'gavel', text: '其他' }
+        { icon: 'fas fa-home', text: '家庭' }
       ],
       years: [
+        { picture: 28, year: 2017 },
         { picture: 28, year: 2018 },
         { picture: 38, year: 2019 },
         { picture: 48, year: 2020 },

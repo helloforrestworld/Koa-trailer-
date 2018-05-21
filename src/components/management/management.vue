@@ -245,7 +245,7 @@ export default {
        icon: 'check_circle'
       },
       searching: true,
-      noResultText: '换个词试试'
+      noResultText: '找不到你要的内容'
     }
   },
   computed: {
@@ -299,9 +299,7 @@ export default {
       axios.get('/admin/movie/list').then(res => {
         if (res.data.success) {
           this.manageList = res.data.data
-          this.noResultText = '换个词试试'
-        } else {
-          this.noResultText = '我猜你没登录'
+          this.noResultText = '找不到你想要的内容'
         }
         this.searching = false
       })
@@ -404,6 +402,7 @@ export default {
       .then(res => {
         if (res.data.success) {
           this.manageList = res.data.data.movies
+          this.noResultText = '换个搜索词试试'
         }
         this.searching = false
       })

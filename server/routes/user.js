@@ -32,6 +32,8 @@ export class adminController {
   }
   
   @del('/movies')
+  @auth // 登录状态
+  @admin('admin') // 管理员
   @required({ // 参数合法性检验
     query: ['id']
   })
@@ -79,6 +81,8 @@ export class adminController {
   }
   
   @post('/upload') // 添加电影
+  @auth // 登录状态
+  @admin('admin') // 管理员
   @required({
     body: ['movie']
   })

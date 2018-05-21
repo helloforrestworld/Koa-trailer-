@@ -51,6 +51,7 @@ export default {
   },
   methods: {
     elisSummary(sum) { // 概要截断
+      if (!sum) return '..没有简介'
       return sum.length > 100 ? sum.slice(0, 100) + '...' : sum
     },
     addTrailer(item) { // 播放预告片
@@ -70,6 +71,7 @@ export default {
       axios.get(url).then(res => {
         this.changeSearching(false)
         if (res.data.success) {
+          console.log(res)
           this.refreshList(res.data.movies)
         } else {
           this.refreshList([])
