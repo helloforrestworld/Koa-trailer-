@@ -51,7 +51,9 @@ const deleteFromQiniu = async (key) => {
 const init = async function init(movie, whichChange){
   return new Promise( async (resolve, reject) => {
     let movies = []
+    let first = false
     if (!movie) { // 批量上传
+      first = true
       movies = await Movie.find({
         $or: [
           {videoKey: {$exists: false}},
@@ -68,15 +70,15 @@ const init = async function init(movie, whichChange){
       let movie = movies[i]
       try {
         let videoData, coverData, posterData
-        if (!movie || whichChange.video) {
+        if (first || (whichChange && whichChange.video)) {
           console.log('准备获取并上传video')
           videoData = await uploadToQiniu(movie.video, nanoid() + '.mp4')
         }
-        if (!movie || whichChange.cover) {
+        if (first || (whichChange && whichChange.cover)) {
           console.log('准备获取并上传cover')
           coverData = await uploadToQiniu(movie.cover, nanoid() + '.png')
         }
-        if (!movie || whichChange.poster) {
+        if (first || (whichChange && whichChange.poster)) {
           console.log('准备获取并上传poster')
           posterData = await uploadToQiniu(movie.poster, nanoid() + '.png')
         }

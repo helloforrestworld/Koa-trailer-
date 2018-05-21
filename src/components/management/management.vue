@@ -12,9 +12,10 @@
         {{alert.text}}
       </v-alert>
     </div>
-    <div class="loading-container" v-if="!manageList.length">
+    <div class="loading-container" v-if="searching">
       <v-progress-circular :width="3" :size="50" indeterminate color="green"></v-progress-circular>
     </div>
+    <no-result v-show="!manageList.length" :title="noResultText"></no-result>
     <v-layout row wrap>
       <v-flex
         xs12
@@ -30,111 +31,114 @@
           <v-spacer></v-spacer>
           <v-layout row align-center style="max-width: 650px">
             <v-text-field
-              :append-icon-cb="() => {}"
+              ref="searchField"
+              :append-icon-cb="getSearchMovies"
+              @keypress.enter="getSearchMovies"
               placeholder="Search..."
               single-line
               append-icon="search"
               color="white"
               hide-details
+              v-model="searchValue"
             ></v-text-field>
           </v-layout>
-          <v-btn dark class="mb-2 mr-2 add-file" @click="newItem">新建</v-btn>
+          <v-btn dark class="mb-2 mr-2 add-file" @click="newItem" style="font-weight:bold">添加</v-btn>
         </v-toolbar>
-    </v-flex>
-  </v-layout>
+      </v-flex>
+    </v-layout>
     
-  <v-dialog v-model="dialog" max-width="500px">
-    <v-card>
-      <v-card-title>
-        <span class="headline">{{ formTitle }}</span>
-      </v-card-title>
-      <v-card-text>
-        <v-container grid-list-md>
-          <v-layout wrap>
-            <v-flex xs12 sm6 md4>
-              <v-text-field v-model="editedItem.title" label="标题"></v-text-field>
-            </v-flex>
-            <v-flex xs12 sm6 md4>
-              <v-text-field v-model="editedItem.video" label="视频地址(http)"></v-text-field>
-            </v-flex>
-            <v-flex xs12 sm6 md4>
-              <v-text-field v-model="editedItem.poster" label="海报地址(http)"></v-text-field>
-            </v-flex>
-            <v-flex xs12 sm6 md4>
-              <v-text-field v-model="editedItem.year" label="上映年份"></v-text-field>
-            </v-flex>
-            <v-flex xs12 sm6 md4>
-              <v-text-field v-model="editedItem.rate" label="评分"></v-text-field>
-            </v-flex>
-            <v-flex xs12 sm6 md4>
-              <v-text-field v-model="editedItem.summary" label="简介"></v-text-field>
-            </v-flex>
-            <v-flex lg12 xs12 sm12 md12>
-              <v-select
-                :items="people"
-                v-model="editedItem.movieTypes"
-                label="分类"
-                item-text="name"
-                item-value="name"
-                multiple
-                chips
-                max-height="auto"
-                autocomplete
-              >
-                <template slot="selection" slot-scope="data">
-                  <v-chip
-                    :selected="data.selected"
-                    :key="JSON.stringify(data.item)"
-                    close
-                    class="chip--select-multi"
-                    @input="data.parent.selectItem(data.item)"
-                  >
-                    <v-avatar>
-                      <img>
-                    </v-avatar>
-                    {{ data.item.name }}
-                  </v-chip>
-                </template>
-                <template slot="item" slot-scope="data">
-                  <template v-if="typeof data.item !== 'object'">
-                    <v-list-tile-content v-text="data.item"></v-list-tile-content>
+    <v-dialog v-model="dialog" max-width="500px">
+      <v-card>
+        <v-card-title>
+          <span class="headline">{{ formTitle }}</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container grid-list-md>
+            <v-layout wrap>
+              <v-flex xs12 sm6 md4>
+                <v-text-field v-model="editedItem.title" label="标题"></v-text-field>
+              </v-flex>
+              <v-flex xs12 sm6 md4>
+                <v-text-field v-model="editedItem.video" label="视频地址(http)"></v-text-field>
+              </v-flex>
+              <v-flex xs12 sm6 md4>
+                <v-text-field v-model="editedItem.poster" label="海报地址(http)"></v-text-field>
+              </v-flex>
+              <v-flex xs12 sm6 md4>
+                <v-text-field v-model="editedItem.year" label="上映年份"></v-text-field>
+              </v-flex>
+              <v-flex xs12 sm6 md4>
+                <v-text-field v-model="editedItem.rate" label="评分"></v-text-field>
+              </v-flex>
+              <v-flex xs12 sm6 md4>
+                <v-text-field v-model="editedItem.summary" label="简介"></v-text-field>
+              </v-flex>
+              <v-flex lg12 xs12 sm12 md12>
+                <v-select
+                  :items="people"
+                  v-model="editedItem.movieTypes"
+                  label="分类"
+                  item-text="name"
+                  item-value="name"
+                  multiple
+                  chips
+                  max-height="auto"
+                  autocomplete
+                >
+                  <template slot="selection" slot-scope="data">
+                    <v-chip
+                      :selected="data.selected"
+                      :key="JSON.stringify(data.item)"
+                      close
+                      class="chip--select-multi"
+                      @input="data.parent.selectItem(data.item)"
+                    >
+                      <v-avatar>
+                        <img>
+                      </v-avatar>
+                      {{ data.item.name }}
+                    </v-chip>
                   </template>
-                  <template v-else>
-                    <v-list-tile-avatar>
-                      <img :src="data.item.avatar">
-                    </v-list-tile-avatar>
-                    <v-list-tile-content>
-                      <v-list-tile-title v-html="data.item.name"></v-list-tile-title>
-                      <v-list-tile-sub-title v-html="data.item.group"></v-list-tile-sub-title>
-                    </v-list-tile-content>
+                  <template slot="item" slot-scope="data">
+                    <template v-if="typeof data.item !== 'object'">
+                      <v-list-tile-content v-text="data.item"></v-list-tile-content>
+                    </template>
+                    <template v-else>
+                      <v-list-tile-avatar>
+                        <img :src="data.item.avatar">
+                      </v-list-tile-avatar>
+                      <v-list-tile-content>
+                        <v-list-tile-title v-html="data.item.name"></v-list-tile-title>
+                        <v-list-tile-sub-title v-html="data.item.group"></v-list-tile-sub-title>
+                      </v-list-tile-content>
+                    </template>
                   </template>
-                </template>
-              </v-select>
-            </v-flex>
-            <v-flex>
-              <v-switch
-                :label="`同步到七牛云: ${editedItem.uptoQiniu.toString()}`"
-                v-model="editedItem.uptoQiniu"
-                color="green"
-              >
-              </v-switch>
-            </v-flex>
-          </v-layout>
-        </v-container>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer></v-spacer>
-        <v-btn color="green darken-1" flat @click.native="close">Cancel</v-btn>
-        <v-btn color="green darken-1" flat @click.native="save">Save</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+                </v-select>
+              </v-flex>
+              <v-flex>
+                <v-switch
+                  :label="`同步到七牛云: ${editedItem.uptoQiniu.toString()}`"
+                  v-model="editedItem.uptoQiniu"
+                  color="green"
+                >
+                </v-switch>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="green darken-1" flat @click.native="close">Cancel</v-btn>
+          <v-btn color="green darken-1" flat @click.native="save">Save</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
     <v-data-table
       :headers="headers"
       :items="manageList"
       hide-actions
       class="data-table"
-      v-if="manageList.length"
+      v-if="manageList.length&&!searching"
     >
       <template slot="items" slot-scope="props">
         <td>
@@ -163,6 +167,7 @@
 <script>
 import axios from 'axios'
 import {baseUrlMixin} from '../../common/js/mixin.js'
+import NoResult from '../../base/no-result/no-result.vue'
 
 export default {
   name: 'management',
@@ -171,6 +176,7 @@ export default {
     return {
       manageList: [],
       dialog: false,
+      searchValue: '',
       headers: [
         {
           text: '海报',
@@ -237,30 +243,65 @@ export default {
        toggle: false,
        type: 'warning',
        icon: 'check_circle'
-      }
+      },
+      searching: true,
+      noResultText: '找不到你要的内容'
     }
   },
-
   computed: {
     formTitle () {
       return this.editedIndex === -1 ? '添加电影' : '编辑电影'
     }
   },
-
+  beforeRouteEnter(to, from ,next) {
+    // 未登录
+    let cookies = {}
+    document.cookie.split(';').map((item) => {
+      if (!item) return
+      cookies[[item.split('=')[0].trim()]] = item.split('=')[1].trim()
+    })
+    if (!cookies['koa:sess'] || !cookies['koa:sess.sig']) {
+      next(vm => {
+        vm.$router.replace('/login')
+      })
+      return
+    }
+    next()
+  },
+  components: {
+    NoResult
+  },
   watch: {
     dialog (val) {
       val || this.close()
+    },
+    searchValue(val) {
+      if (val === '') {
+        this.searching = true
+        clearTimeout(this.searchTimer) // 修复搜素后不能聚焦
+        this.searchTimer = setTimeout(() => {
+          this.$refs.searchField.$el.firstElementChild.firstElementChild.focus()
+        }, 100)
+        this.initData()
+      }
     }
   },
   
   created () {
     this.initData() // 所有电影数据
+    this.searchTimer = setTimeout(() => {
+      this.$refs.searchField && this.$refs.searchField.$el.firstElementChild.firstElementChild.focus()
+    }, 1000)
   },
 
   methods: {
     initData() { // 所有电影数据
       axios.get('/admin/movie/list').then(res => {
-        this.manageList = res.data.movies
+        if (res.data.success) {
+          this.manageList = res.data.data
+          this.noResultText = '找不到你想要的内容'
+        }
+        this.searching = false
       })
     },
     backHome() {
@@ -316,7 +357,9 @@ export default {
     deleteItem (item) {
       let confirm =  window.confirm('确定要删除' + item.title + '吗')
       if (confirm) {
+        this.searching = true
         axios.delete(`admin/movies/?id=${item._id}`).then(res => {
+          this.searching = false
           if (res.data.success) {
             this.manageList = res.data.data
             this.alertShow('success', '删除成功')
@@ -332,9 +375,11 @@ export default {
     save () {
       this.editedItem.cover = this.editedItem.poster
       this.editedItem.pubdate[0].date = new Date(new Date().setYear(this.editedItem.year))
+      this.searching = true
       axios.post('/admin/upload', {
         movie: this.editedItem
       }).then(res => {
+        this.searching = false
         if (res.data.success) {
           this.manageList = res.data.data
           this.alertShow('success', this.editedIndex === -1 ? '添加成功' : '修改成功')
@@ -343,6 +388,24 @@ export default {
         }
       })
       this.close()
+    },
+    getSearchMovies() {
+      if (this.searchValue.trim() === '') return
+      this.searching = true
+      
+      clearTimeout(this.searchTimer) // 修复搜素后不能聚焦
+      this.searchTimer = setTimeout(() => {
+        this.$refs.searchField.$el.firstElementChild.firstElementChild.focus()
+      }, 20)
+      
+      axios.get(`/api/v0/movies/search/?value=${this.searchValue}`)
+      .then(res => {
+        if (res.data.success) {
+          this.manageList = res.data.data.movies
+          this.noResultText = '换个搜索词试试'
+        }
+        this.searching = false
+      })
     }
   }
 }
@@ -362,8 +425,8 @@ export default {
 .management .loading-container{
   position: fixed;
   left: 50%;
-  top: 50%;
-  transform: translateX(-50%);
+  top: 44%;
+  transform: translateX(-100%);
   z-index: 1000;
 }
 

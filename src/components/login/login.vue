@@ -86,6 +86,23 @@
         },
       }
     },
+    created() {
+    },
+    beforeRouteEnter(to, from, next) {
+      // session会话存在
+      let cookies = {}
+      document.cookie.split(';').map((item) => {
+        if (!item) return
+        cookies[[item.split('=')[0].trim()]] = item.split('=')[1].trim()
+      })
+      if (cookies['koa:sess'] && cookies['koa:sess.sig']) {
+        next(vm => {
+          vm.$router.replace('/management')
+        })
+        return
+      }
+      next()
+    },
     methods: {
       submit () {
         if (this.$refs.form.validate()) {
@@ -94,7 +111,7 @@
             password: this.password
           }).then(res => {
             if (res.data.success) {
-              this.$router.push('/management')
+              this.$router.replace('/management')
             }
           })
         }

@@ -7,6 +7,9 @@
             <div class="detail-player" ref="detailPlayer"></div>
           </v-flex>
           <v-flex xs2>
+            <div class="loading-container" v-show="!movieDatail.meta">
+              <v-progress-circular :width="3" :size="30" indeterminate color="green"></v-progress-circular>
+            </div>
             <router-link class="back" :to="{ path: '/'}">回到首页</router-link>
             <v-tabs
               v-model="active"
@@ -21,9 +24,6 @@
                 相关电影
               </v-tab>
               <v-tab-item class="moviedesc">
-                <div class="loading-container" v-if="!movieDatail.meta">
-                  <v-progress-circular :width="3" :size="30" indeterminate color="green"></v-progress-circular>
-                </div>
                 <dl v-if="movieDatail.meta">
                   <dt>
                     <h2>{{movieDatail.title}}</h2>
@@ -49,9 +49,6 @@
                 </dl>
               </v-tab-item>
               <v-tab-item>
-                <div class="loading-container" v-if="!relativeMovies.length">
-                  <v-progress-circular :width="3" :size="30" indeterminate color="green"></v-progress-circular>
-                </div>
                 <v-list two-line v-if="relativeMovies.length">
                   <template v-for="(item, index) in relativeMovies">
                     <v-list-tile avatar @click="tabRelative(item)">
@@ -110,7 +107,7 @@ export default {
   },
   methods: {
     initData(id) { // 根据id请求数据
-      axios.get('/api/v0/movies/' + id).then(res => {
+      axios.get('/api/v0/movies/detail/' + id).then(res => {
         if (res.status === 200) {
           this.movieDatail = res.data.data.movie
           this.relativeMovies = res.data.data.relativeMovies
@@ -146,6 +143,7 @@ export default {
 </script>
 <style>
  .movie-detail .content .flex.xs10, .movie-detail .content .flex.xs2 {
+   position: relative;
    height: 100% !important;
  }
  .movie-detail .content .flex.xs2{

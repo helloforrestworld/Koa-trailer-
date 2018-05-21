@@ -52,11 +52,14 @@
       <v-spacer></v-spacer>
       <v-layout row align-center style="max-width: 650px">
         <v-text-field
-          :append-icon-cb="() => {}"
+          ref="searchField"
+          :append-icon-cb="getSearchMovies"
+          @keypress.enter="getSearchMovies"
           placeholder="Search..."
           single-line
           append-icon="search"
           color="white"
+          v-model="searchValue"
           hide-details
         ></v-text-field>
       </v-layout>
@@ -65,6 +68,9 @@
   </div>
 </template>
 <script>
+import axios from 'axios'
+import {mapMutations} from 'vuex'
+
 export default {
   name: "toolbar",
   data() {
@@ -78,17 +84,24 @@ export default {
         { icon: 'watch_later', text: '剧情' },
         { icon: 'fab fa-fort-awesome-alt', text: '动画' },
         { icon: 'fas fa-car', text: '冒险' },
-        { icon: 'fas fa-home', text: '家庭' },
-        { icon: 'gavel', text: '其他' }
+        { icon: 'fas fa-home', text: '家庭' }
       ],
       years: [
+        { picture: 28, year: 2017 },
         { picture: 28, year: 2018 },
         { picture: 38, year: 2019 },
         { picture: 48, year: 2020 },
         { picture: 58, year: 2021 },
         { picture: 78, year: 2022 }
-      ]
+      ],
+      searchValue: ''
     }
+  },
+  created() {
+    // 聚焦搜索框
+    this.searchTimer = setTimeout(() => {
+      this.$refs.searchField && this.$refs.searchField.$el.firstElementChild.firstElementChild.focus()
+    }, 1000)
   },
   mounted() {
     this.$nextTick(() => {
@@ -110,12 +123,29 @@ export default {
       }
       this.$router.push(path)
     },
+    getSearchMovies() {
+      if (this.searchValue.trim() === '') return
+      this.changeSearching(true)
+      axios.get(`/api/v0/movies/search/?value=${this.searchValue}`)
+      .then(res => {
+        this.changeSearching(false)
+        if (res.data.success) {
+          this.refreshList(res.data.data.movies)
+        } else {
+          this.refreshList([])
+        }
+      })
+    },
     backHome() {
       this.$router.push('/')
     },
     goLogin() {
       this.$router.push('/login')
-    }
+    },
+    ...mapMutations({
+      'refreshList': 'refreshRecommandList',
+      'changeSearching': 'changeSearching'
+    })
   },
   watch: {
     $route(newRoute) {
@@ -123,6 +153,18 @@ export default {
         this.drawer = false
       } else {
         this.drawer = true
+      }
+    },
+    searchValue(val) {
+      if (val === '') {
+        this.changeSearching(true)
+        axios.get('/api/v0/movies/', {
+          params: this.$route.query
+        })
+        .then(res => {
+          this.changeSearching(false)
+          this.refreshList(res.data.movies)
+        })
       }
     }
   }
