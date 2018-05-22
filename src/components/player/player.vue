@@ -91,7 +91,7 @@ export default {
    z-index: 999;
    right: 4px;
    top: 42px;
-   background-color: rgba(30, 107, 117, 0.6) !important;
+   background-color: rgb(122, 123, 130, 0.6) !important;
    
    height:80px !important;
    width: 50px !important;

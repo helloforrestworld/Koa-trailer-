@@ -27,7 +27,8 @@ async function fetchMovie(item) {
       {summary: ''},
       {title: ''},
       {year: {$exists: false}}
-    ]
+    ],
+    doubanId: {$exists: true}
   }).exec()
   
   for(let i = 0; i < movies.length; i++) {

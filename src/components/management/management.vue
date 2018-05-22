@@ -15,7 +15,7 @@
     <div class="loading-container" v-if="searching">
       <v-progress-circular :width="3" :size="50" indeterminate color="green"></v-progress-circular>
     </div>
-    <no-result v-show="!manageList.length" :title="noResultText"></no-result>
+    <no-result v-show="!manageList.length && !searching" :title="noResultText"></no-result>
     <v-layout row wrap>
       <v-flex
         xs12
@@ -50,7 +50,7 @@
     <v-dialog v-model="dialog" max-width="500px">
       <v-card>
         <v-card-title>
-          <span class="headline">{{ formTitle }}</span>
+          <span class="headline">{{ editTitle }}</span>
         </v-card-title>
         <v-card-text>
           <v-container grid-list-md>
@@ -161,6 +161,10 @@
         </td>
       </template>
     </v-data-table>
+    <v-container fluid class="loadmore-container" >
+      <v-progress-circular :width="3" :size="30" indeterminate color="amber" v-show="manageList.length && !searching && hasMore"></v-progress-circular>
+      <p class="text" v-show="manageList.length && !searching">{{loadMoreText}}</p>
+    </v-container>
   </div>
 </template>
 
@@ -169,6 +173,9 @@ import axios from 'axios'
 import {baseUrlMixin} from '../../common/js/mixin.js'
 import NoResult from '../../base/no-result/no-result.vue'
 
+const LENGTH = 10 // 每次请求10条数据
+const LOADHEIGHT = 40 // 加载更多容器高度
+
 export default {
   name: 'management',
   mixins: [baseUrlMixin],
@@ -176,7 +183,14 @@ export default {
     return {
       manageList: [],
       dialog: false,
+      searching: true,
       searchValue: '',
+      start: 0,
+      loadMoreText: '加载中',
+      hasMore: true,
+      
+      noResultText: '找不到你要的内容',
+      
       headers: [
         {
           text: '海报',
@@ -243,13 +257,11 @@ export default {
        toggle: false,
        type: 'warning',
        icon: 'check_circle'
-      },
-      searching: true,
-      noResultText: '找不到你要的内容'
+      }
     }
   },
   computed: {
-    formTitle () {
+    editTitle () {
       return this.editedIndex === -1 ? '添加电影' : '编辑电影'
     }
   },
@@ -277,37 +289,87 @@ export default {
     },
     searchValue(val) {
       if (val === '') {
-        this.searching = true
-        clearTimeout(this.searchTimer) // 修复搜素后不能聚焦
-        this.searchTimer = setTimeout(() => {
-          this.$refs.searchField.$el.firstElementChild.firstElementChild.focus()
-        }, 100)
-        this.initData()
+        this.$router.push('/management')
+        this.fetchMovies(true, false)
       }
     }
   },
   
   created () {
-    this.initData() // 所有电影数据
-    this.searchTimer = setTimeout(() => {
-      this.$refs.searchField && this.$refs.searchField.$el.firstElementChild.firstElementChild.focus()
-    }, 1000)
+    this.fetchMovies(true, false) // 获取基础数据
+    
+    window.addEventListener('scroll', (e) => { // 下滚加载更多
+      if (!this.hasMore) return
+      if (window.pageYOffset + LOADHEIGHT> document.body.clientHeight - window.innerHeight) {
+        clearTimeout(this.loadTimer)
+        this.loadTimer = setTimeout(() => { // 节流
+          this.start += LENGTH
+          this.fetchMovies(false, !!this.$route.query.search)
+        }, 100)
+      }
+    }, false)
   },
 
   methods: {
-    initData() { // 所有电影数据
-      axios.get('/admin/movie/list').then(res => {
-        if (res.data.success) {
-          this.manageList = res.data.data
-          this.noResultText = '找不到你想要的内容'
-        }
+    fetchMovies(isInit, isSearch) { // 获取数据方法封装
+      let baseUrl = isSearch ? `/api/v0/movies/search/?search=${this.searchValue}&` : `/admin/movie/list/?` 
+      
+      if (isInit) {
+        baseUrl += `start=0&end=10`
+        this.initData(baseUrl)
+      } else {
+        this.loadMore(baseUrl)
+      }
+    },
+    initData(baseUrl) { // 加载基础数据
+      this.start = 0
+      this.hasMore = true
+      this.loadMoreText = '加载中'
+      
+      clearTimeout(this.searchTimer) // 修复搜素后不能聚焦
+      this.searchTimer = setTimeout(() => {
+        this.$refs.searchField.$el.firstElementChild.firstElementChild.focus()
+      }, 20)
+      
+      this.searching = true
+      this.noResultText = '找不到你想要的内容'
+      axios.get(baseUrl).then(res => {
         this.searching = false
+        if (res.data.success) {
+          this.manageList = res.data.movies
+          if (res.data.total === this.manageList.length) {
+            this.hasMore = false
+            this.loadMoreText = '-----到底怎么了-----'
+          }
+        }
       })
     },
-    backHome() {
+    loadMore(baseUrl) { // 加载更多
+      this.noResultText = '换个搜索词试试'
+      axios.get(`${baseUrl}start=${this.start}&end=${this.start + LENGTH}`)
+      .then(res => {
+        if (res.data.success) {
+          this.manageList = this.manageList.concat(res.data.movies)
+          if (this.manageList.length === res.data.total) {
+            this.hasMore = false
+            this.loadMoreText = '-----到底怎么了-----'
+          }
+        } else {
+          this.hasMore = false
+          this.loadMoreText = '-----到底怎么了-----'
+        }
+      })
+    },
+    getSearchMovies() { // 搜索 第一批数据
+      if (this.searchValue.trim() === '') return
+      this.$router.push(`/management/?search=${this.searchValue}`)
+      this.manageList = []
+      this.fetchMovies(true, true)
+    },
+    backHome() { // 回到首页
       this.$router.push('/')
     },
-    alertShow (type, text) {
+    alertShow (type, text) { // 弹窗
       this.$refs.alert.$el.style.zIndex = '999'
       this.alert = {
         toggle: true,
@@ -388,24 +450,6 @@ export default {
         }
       })
       this.close()
-    },
-    getSearchMovies() {
-      if (this.searchValue.trim() === '') return
-      this.searching = true
-      
-      clearTimeout(this.searchTimer) // 修复搜素后不能聚焦
-      this.searchTimer = setTimeout(() => {
-        this.$refs.searchField.$el.firstElementChild.firstElementChild.focus()
-      }, 20)
-      
-      axios.get(`/api/v0/movies/search/?value=${this.searchValue}`)
-      .then(res => {
-        if (res.data.success) {
-          this.manageList = res.data.data.movies
-          this.noResultText = '换个搜索词试试'
-        }
-        this.searching = false
-      })
     }
   }
 }
@@ -437,5 +481,12 @@ export default {
   height: 50px;
   left: 0;
   top: -4px;
+}
+.management .loadmore-container{
+  text-align: center;
+  background-color: #303030;
+}
+.management .loadmore-container .text {
+  color: rgb(100, 101, 105);
 }
 </style>

@@ -118,8 +118,6 @@ export const auth = convert (async (ctx, next) => {
 export const admin = roleExpected => convert (async (ctx, next) => {
   const { role } = ctx.session.user
   
-  console.log(role)
-  
   if (!role || role !== roleExpected  ) {
     return (
       ctx.body = {

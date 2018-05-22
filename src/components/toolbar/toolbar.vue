@@ -46,7 +46,7 @@
     >
       <v-toolbar-side-icon @click.stop="drawer = !drawer"></v-toolbar-side-icon>
       <v-icon class="mx-3"></v-icon>
-      <v-toolbar-title class="mr-5 align-center head-title" @click="backHome">
+      <v-toolbar-title class="mr-5 align-center head-title" @click="filterMovie()">
         <span class="title">看个片啥的</span>
       </v-toolbar-title>
       <v-spacer></v-spacer>
@@ -115,37 +115,25 @@ export default {
   methods: {
     filterMovie(opt) { // 切换分类
       let path = `/?`
-      if (opt.year) {
-        path += `year=${opt.year}`
+      for (let key in opt) {
+        path += `${key}=${opt[key]}&`
       }
-      if (opt.type) {
-        path += `type=${opt.type}`
-      }
+      path = path.substring(0, path.length - 1)
+      
       this.$router.push(path)
     },
-    getSearchMovies() {
+    getSearchMovies() { // 搜索
       if (this.searchValue.trim() === '') return
-      this.changeSearching(true)
-      axios.get(`/api/v0/movies/search/?value=${this.searchValue}`)
-      .then(res => {
-        this.changeSearching(false)
-        if (res.data.success) {
-          this.refreshList(res.data.data.movies)
-        } else {
-          this.refreshList([])
-        }
-      })
+      this.changeSearchStatus(true)
+      
+      let query = this.$route.query
+      delete query.search
+      this.$router.push({path: `/?search=${this.searchValue}`, query})
     },
-    backHome() {
-      this.$router.push('/')
-    },
-    goLogin() {
+    goLogin() { // 跳转登录
       this.$router.push('/login')
     },
-    ...mapMutations({
-      'refreshList': 'refreshRecommandList',
-      'changeSearching': 'changeSearching'
-    })
+    ...mapMutations(['changeSearchStatus'])
   },
   watch: {
     $route(newRoute) {
@@ -156,15 +144,15 @@ export default {
       }
     },
     searchValue(val) {
-      if (val === '') {
-        this.changeSearching(true)
-        axios.get('/api/v0/movies/', {
-          params: this.$route.query
-        })
-        .then(res => {
-          this.changeSearching(false)
-          this.refreshList(res.data.movies)
-        })
+      if (val === '') { // 退格搜索词
+        if (this.$route.query.search) {
+          let query = this.$route.query
+          let str = ''
+          delete query.search
+          
+          this.$router.push({path: `/?ignore=ignore`, query})
+          console.log(this.$route)
+        }
       }
     }
   }

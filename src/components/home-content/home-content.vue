@@ -24,7 +24,28 @@
              </v-card-actions>
            </v-card>
          </v-flex>
+         <v-flex v-for="(item, index) in moreList" class="mt-5 mr-3" @click="checkDeatil(item)">
+            <v-card class="card">
+              <v-card-media :src="addBase(item, 'poster')" height="200px">
+              </v-card-media>
+              <v-card-title primary-title>
+                <div>
+                  <h3 class="headline mb-0">{{item.title}}</h3>
+                  <p class="date">{{formateDate(item.pubdate)}}</p>
+                  <div class="summary">{{elisSummary(item.summary)}}</div>
+                </div>
+              </v-card-title>
+              <v-card-actions>
+                <v-btn flat color="orange" @click.stop="addTrailer(item)">播放预告片</v-btn>
+                <v-btn flat color="orange">详情</v-btn>
+              </v-card-actions>
+            </v-card>
+          </v-flex>
         </v-layout>
+      </v-container>
+      <v-container fluid class="loadmore-container" >
+        <v-progress-circular :width="3" :size="30" indeterminate color="amber" v-show="loadMoreShow && !searching"></v-progress-circular>
+        <p class="text" v-show="recommandList.length && !searching">{{loadMoreText}}</p>
       </v-container>
     </v-content>
   </div>
@@ -35,15 +56,35 @@ import {mapMutations, mapGetters} from 'vuex'
 import {baseUrlMixin, handleContent} from '../../common/js/mixin.js'
 import NoResult from '../../base/no-result/no-result.vue'
 
+const LENGTH = 10 // 每次请求10条数据
+const LOADHEIGHT = 40 // 加载更多容器高度
+
 export default {
   name: "home",
   mixins: [baseUrlMixin, handleContent],
   created() {
-    // 推荐页数据
-    this.fetchMovies(this.$route)
+    this.fetchMovies(true) // 获取基础数据
+    
+    window.addEventListener('scroll', (e) => { // 下滚加载更多
+      if (!this.hasMore) return
+      if (window.pageYOffset + LOADHEIGHT> document.body.clientHeight - window.innerHeight) {
+        clearTimeout(this.loadTimer)
+        this.loadTimer = setTimeout(() => {
+          this.start += LENGTH
+          this.loadMoreText = '加载中'
+          this.fetchMovies(false)
+        }, 100)
+      }
+    }, false)
+    
   },
   data() {
     return {
+      recommandList: [],
+      moreList: [],
+      hasMore: true,
+      start: 0,
+      loadMoreText: '加载中'
     }
   },
   components: {
@@ -57,43 +98,76 @@ export default {
     addTrailer(item) { // 播放预告片
       this.tabVideo(item)
     },
-    fetchMovies(route) { // 获取电影数据
-      let url = `/api/v0/movies/?`
-      const year = route.query.year
-      const type = route.query.type
-      if (year) {
-        url += `year=${year}`
+    fetchMovies(isInit) { // 获取电影数据
+      const route = this.$route 
+      const {year, type, search} = route.query
+      let baseUrl = search ? `/api/v0/movies/search/?` : `/api/v0/movies/?`
+      
+      for (let key in route.query) {
+        baseUrl += `${key}=${route.query[key]}&`
       }
-      if (type) {
-        url += `type=${type}`
+      baseUrl = baseUrl.substring(0, baseUrl.length - 1)
+      
+      if (isInit) {
+        baseUrl += `${baseUrl[baseUrl.length - 1] === '/' ? '?' : '&'}start=0&end=10`
+        this.initData(baseUrl)
+      } else {
+        this.loadMore(baseUrl)
       }
-      this.changeSearching(true)
-      axios.get(url).then(res => {
-        this.changeSearching(false)
+    },
+    initData(baseUrl) { // 基础数据
+      axios.get(baseUrl)
+        .then(res => {
+          this.changeSearchStatus(false)
+          if (res.data.success) {
+            this.recommandList = res.data.movies
+            if (res.data.movies.length === res.data.total) {
+              this.loadMoreText = '-----到底怎么了-----'
+              this.hasMore = false
+            }
+          } else {
+            this.recommandList = []
+          }
+        })
+    },
+    loadMore(baseUrl) { // 加载更多
+      axios.get(baseUrl, {
+        params: {
+          start: this.start,
+          end: this.start + LENGTH
+        }
+      }).then(res => {
         if (res.data.success) {
-          console.log(res)
-          this.refreshList(res.data.movies)
-        } else {
-          this.refreshList([])
+          if (res.data.total === this.moreList.length + this.recommandList.length) {
+            this.loadMoreText = '-----到底怎么了-----'
+            this.hasMore = false
+          }
+          this.moreList = this.moreList.concat(res.data.movies)
         }
       })
     },
     checkDeatil(item) { // 查看详情
       this.$router.push(`/detail/${item._id}`)
     },
-    ...mapMutations({
-      'tabVideo': 'tabVideo',
-      'refreshList': 'refreshRecommandList',
-      'changeSearching': 'changeSearching'
-    })
+    ...mapMutations(['tabVideo', 'changeSearchStatus'])
   },
   watch: {
-    $route(newRoute) { // 切换分类
-      this.fetchMovies(newRoute)
+    $route(newRoute) { // 切换分类 或者 搜索
+      // 初始化
+      this.changeSearchStatus(true)
+      this.moreList = []
+      this.hasMore = true
+      this.loadMoreText = '加载中'
+      this.start = 0
+      
+      this.fetchMovies(true)
     }
   },
   computed: {
-    ...mapGetters(['recommandList', 'searching'])
+    loadMoreShow() {
+      return this.recommandList.length && this.hasMore
+    },
+    ...mapGetters(['searching'])
   }
 }
 </script>
@@ -112,5 +186,12 @@ export default {
     top: 44%;
     transform: translateX(-32px);
     z-index: 1000;
+  }
+  .home .loadmore-container{
+    text-align: center;
+    background-color: #303030;
+  }
+  .home .loadmore-container .text {
+    color: rgb(100, 101, 105);
   }
 </style>
