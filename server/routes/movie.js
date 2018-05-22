@@ -10,12 +10,18 @@ const {
 export class movieController {
   @get('/')  // 获取所有movie数据
   async getMovies (ctx, next) {
-    const {type, year} = ctx.query
+    let {type, year, start = 0, end} = ctx.query
     const movies = await getAllMovies(type, year)
+    let ret = []
+    start = parseInt(start)
+    end = parseInt(end)
+    end = end ? end : movies.length
+    ret = movies.slice(start, end)
     
     ctx.body = {
       success: movies.length ? true : false,
-      movies
+      movies: ret,
+      total: movies.length
     }
   }
   @get('/detail/:id') // 获取某电影详细数据
@@ -25,29 +31,31 @@ export class movieController {
     const relativeMovies = await getRelativeMovies(movie)
     
     ctx.body = {
-      data: {
-        success: movie ? true : false, 
-        movie,
-        relativeMovies
-      },
-      success: true
+      success: movie ? true : false, 
+      movie,
+      relativeMovies
     }
   }
   
   @get('/search') // 搜索
   async getSearchMovies (ctx, next) {
-    const value = ctx.query.value
-    const ret = await searchMovies(value)
-    if (ret.err) {
+    let {search, start = 0, end} = ctx.query
+    let response = await searchMovies(search)
+    
+    if (response.err) {
       ctx.body = {
         success: false,
         err: '数据库搜索错误'
       }
-    } else if (ret.movies) {
+    } else if (response.movies) {
+      let ret = []
+      start = parseInt(start)
+      end = parseInt(end)
+      end = end ? end : response.movies.length
+      ret = response.movies.slice(start, end)
       ctx.body = {
-        data: {
-          movies: ret.movies
-        },
+        movies: ret,
+        total: response.movies.length,
         success: true
       }
     }

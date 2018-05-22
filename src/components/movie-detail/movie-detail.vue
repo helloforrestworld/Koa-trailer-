@@ -108,9 +108,9 @@ export default {
   methods: {
     initData(id) { // 根据id请求数据
       axios.get('/api/v0/movies/detail/' + id).then(res => {
-        if (res.status === 200) {
-          this.movieDatail = res.data.data.movie
-          this.relativeMovies = res.data.data.relativeMovies
+        if (res.data.success === true) {
+          this.movieDatail = res.data.movie
+          this.relativeMovies = res.data.relativeMovies
           this.tabVideo(this.movieDatail)
         }
       })

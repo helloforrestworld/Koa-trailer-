@@ -23,10 +23,19 @@ export class adminController {
   @auth // 登录状态
   @admin('admin') // 管理员
   async getMovies (ctx, next) {
+    let {start = 0, end} = ctx.query
     const movies = await getAllMovies()
     
+    start = parseInt(start)
+    end = parseInt(end)
+    end = end ? end : movies.length
+    let ret = []
+    
+    if (movies) ret = movies.slice(start, end) 
+    
     ctx.body = {
-      data: movies,
+      movies: ret,
+      total: movies.length,
       success: true
     }
   }

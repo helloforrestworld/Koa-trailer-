@@ -17,7 +17,7 @@ export const getAllMovies =  async (type, year) => {
   if (year) {
     query.year = year
   }
-  const movies = await Movie.find(query)
+  const movies = await Movie.find(query).sort({'meta.updatedAt':  -1}).exec() 
   
   return movies
 }
@@ -34,7 +34,7 @@ export const getRelativeMovies =  async (movie) => {
     movieTypes: {
       $in: movie.movieTypes
     }
-  }).exec()
+  }).limit(10).exec()
   
   return movies
 }
@@ -97,19 +97,19 @@ export const fetchAndSave = async (item) => {
   })
 }
 
-export const searchMovies = async (value) => {
+export const searchMovies = async (search) => {
   let movies
   try {
     let query = {
       $or: [
-        { title: {$regex: new RegExp(value)} },
-        { tags: {$in: [value]} },
-        { movieTypes: {$in: [value]} }
+        { title: {$regex: new RegExp(search, 'i')} },
+        { tags: {$in: [search]} },
+        { movieTypes: {$in: [search]} }
       ]
     }
-    if (parseInt(value)) {
+    if (parseInt(search)) {
       query.$or.push(
-        { year: parseInt(value)}
+        { year: parseInt(search)}
       )
     }
     movies = await Movie.find(query).exec()

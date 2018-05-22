@@ -17,7 +17,7 @@ export const handleContent = {
       if (!pubdates) return 'xxx-xxx(xxx)'
       pubdates.forEach((pubdate, index) => {
         let now = new Date(pubdate.date)
-        ret += now.getFullYear() + '-' + now.getMonth() + '-' + now.getDate()
+        ret += now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate()
         if (pubdate.country) {
           ret += `(${pubdate.country})`
           if (!(index === pubdates.length - 1)) ret += '/'
