@@ -170,7 +170,6 @@
 </template>
 
 <script>
-import axios from 'axios'
 import {baseUrlMixin} from '../../common/js/mixin.js'
 import NoResult from '../../base/no-result/no-result.vue'
 
@@ -334,7 +333,7 @@ export default {
       
       this.searching = true
       this.noResultText = '找不到你想要的内容'
-      axios.get(baseUrl).then(res => {
+      this.$http.get(baseUrl).then(res => {
         this.searching = false
         if (res.data.success) {
           this.manageList = res.data.movies
@@ -347,7 +346,7 @@ export default {
     },
     loadMore(baseUrl) { // 加载更多
       this.noResultText = '换个搜索词试试'
-      axios.get(`${baseUrl}start=${this.start}&end=${this.start + LENGTH}`)
+      this.$http.get(`${baseUrl}start=${this.start}&end=${this.start + LENGTH}`)
       .then(res => {
         if (res.data.success) {
           this.manageList = this.manageList.concat(res.data.movies)
@@ -421,7 +420,7 @@ export default {
       let confirm =  window.confirm('确定要删除' + item.title + '吗')
       if (confirm) {
         this.searching = true
-        axios.delete(`admin/movies/?id=${item._id}`).then(res => {
+        this.$http.delete(`admin/movies/?id=${item._id}`).then(res => {
           this.searching = false
           if (res.data.success) {
             this.manageList = res.data.data
@@ -439,7 +438,7 @@ export default {
       this.editedItem.cover = this.editedItem.poster
       this.editedItem.pubdate[0].date = new Date(new Date().setYear(this.editedItem.year))
       this.searching = true
-      axios.post('/admin/upload', {
+      this.$http.post('/admin/upload', {
         movie: this.editedItem
       }).then(res => {
         this.searching = false

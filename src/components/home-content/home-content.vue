@@ -51,7 +51,6 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
 import {mapMutations, mapGetters} from 'vuex'
 import {baseUrlMixin, handleContent} from '../../common/js/mixin.js'
 import NoResult from '../../base/no-result/no-result.vue'
@@ -116,7 +115,7 @@ export default {
       }
     },
     initData(baseUrl) { // 基础数据
-      axios.get(baseUrl)
+      this.$http.get(baseUrl)
         .then(res => {
           this.changeSearchStatus(false)
           if (res.data.success) {
@@ -131,7 +130,7 @@ export default {
         })
     },
     loadMore(baseUrl) { // 加载更多
-      axios.get(baseUrl, {
+      this.$http.get(baseUrl, {
         params: {
           start: this.start,
           end: this.start + LENGTH
