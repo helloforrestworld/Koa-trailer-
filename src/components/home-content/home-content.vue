@@ -9,7 +9,7 @@
         <v-layout space-around row wrap v-show="recommandList.length&&!searching">
           <v-flex v-for="(item, index) in recommandList" class="mt-5 mr-3" @click="checkDeatil(item)">
            <v-card class="card">
-             <v-card-media :src="addBase(item, 'poster')" height="200px">
+             <v-card-media  v-lazy:background-image="addBase(item, 'poster')" height="200px">
              </v-card-media>
              <v-card-title primary-title>
                <div>
@@ -26,7 +26,7 @@
          </v-flex>
          <v-flex v-for="(item, index) in moreList" class="mt-5 mr-3" @click="checkDeatil(item)">
             <v-card class="card">
-              <v-card-media :src="addBase(item, 'poster')" height="200px">
+              <v-card-media v-lazy:background-image="addBase(item, 'poster')"  height="200px">
               </v-card-media>
               <v-card-title primary-title>
                 <div>
@@ -193,5 +193,9 @@ export default {
   }
   .home .loadmore-container .text {
     color: rgb(100, 101, 105);
+  }
+  .home .card__media {
+    background-position: 0 center  !important;
+    background-size: 100%;
   }
 </style>

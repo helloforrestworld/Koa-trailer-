@@ -53,7 +53,7 @@
                   <template v-for="(item, index) in relativeMovies">
                     <v-list-tile avatar @click="tabRelative(item)">
                       <v-list-tile-avatar>
-                        <img :src="addBase(item, 'poster')">
+                        <img v-lazy="addBase(item, 'poster')">
                       </v-list-tile-avatar>
                       <v-list-tile-content>
                         <v-list-tile-title v-html="item.title"></v-list-tile-title>

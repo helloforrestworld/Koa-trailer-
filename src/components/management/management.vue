@@ -136,6 +136,7 @@
     <v-data-table
       :headers="headers"
       :items="manageList"
+      :disable-initial-sort="true"
       hide-actions
       class="data-table"
       v-if="manageList.length&&!searching"
@@ -143,7 +144,7 @@
       <template slot="items" slot-scope="props">
         <td>
           <v-card>
-            <v-card-media :src="addBase(props.item, 'poster')" height="200">
+            <v-card-media v-lazy:background-image="addBase(props.item, 'poster')" height="200">
             </v-card-media>
           </v-card>
         </td>
@@ -466,6 +467,11 @@ export default {
 .management .data-table .card__media__content{
   width: 200px !important;
 }
+.management .data-table .card__media {
+  background-position: 0 center  !important;
+  background-size: 100%;
+}
+
 .management .loading-container{
   position: fixed;
   left: 50%;
