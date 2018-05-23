@@ -11,8 +11,6 @@ const bundler = new Bundler(r('../../../index.html'), {
 })
 
 export const dev = async app => {
-  bundler.addAssetType('vue', 'parcel-plugin-vue/src/VueAsset');
-  bundler.addPackager('js', 'parcel-plugin-vue/src/packagers/JSPackager');
   await bundler.bundle()
   
   app.use(stati(r('../../../dist')))

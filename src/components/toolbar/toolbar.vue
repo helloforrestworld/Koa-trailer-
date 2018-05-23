@@ -68,7 +68,6 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
 import {mapMutations} from 'vuex'
 
 export default {
@@ -87,12 +86,8 @@ export default {
         { icon: 'fas fa-home', text: '家庭' }
       ],
       years: [
-        { picture: 28, year: 2017 },
-        { picture: 28, year: 2018 },
-        { picture: 38, year: 2019 },
-        { picture: 48, year: 2020 },
-        { picture: 58, year: 2021 },
-        { picture: 78, year: 2022 }
+        { picture: 30, year: 2017 },
+        { picture: 44, year: 2018 }
       ],
       searchValue: ''
     }
@@ -128,6 +123,7 @@ export default {
       
       let query = this.$route.query
       delete query.search
+      delete query.ignore
       this.$router.push({path: `/?search=${this.searchValue}`, query})
     },
     goLogin() { // 跳转登录

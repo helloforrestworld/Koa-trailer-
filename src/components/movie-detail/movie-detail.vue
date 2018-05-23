@@ -53,7 +53,7 @@
                   <template v-for="(item, index) in relativeMovies">
                     <v-list-tile avatar @click="tabRelative(item)">
                       <v-list-tile-avatar>
-                        <img :src="addBase(item, 'poster')">
+                        <img v-lazy="addBase(item, 'poster')">
                       </v-list-tile-avatar>
                       <v-list-tile-content>
                         <v-list-tile-title v-html="item.title"></v-list-tile-title>
@@ -71,7 +71,6 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
 import DPlayer from 'DPlayer'
 import {baseUrlMixin, handleContent} from '../../common/js/mixin'
 
@@ -107,7 +106,7 @@ export default {
   },
   methods: {
     initData(id) { // 根据id请求数据
-      axios.get('/api/v0/movies/detail/' + id).then(res => {
+      this.$http.get('/api/v0/movies/detail/' + id).then(res => {
         if (res.data.success === true) {
           this.movieDatail = res.data.movie
           this.relativeMovies = res.data.relativeMovies

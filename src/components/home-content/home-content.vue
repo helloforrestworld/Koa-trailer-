@@ -9,7 +9,7 @@
         <v-layout space-around row wrap v-show="recommandList.length&&!searching">
           <v-flex v-for="(item, index) in recommandList" class="mt-5 mr-3" @click="checkDeatil(item)">
            <v-card class="card">
-             <v-card-media :src="addBase(item, 'poster')" height="200px">
+             <v-card-media  v-lazy:background-image="addBase(item, 'poster')" height="200px">
              </v-card-media>
              <v-card-title primary-title>
                <div>
@@ -26,7 +26,7 @@
          </v-flex>
          <v-flex v-for="(item, index) in moreList" class="mt-5 mr-3" @click="checkDeatil(item)">
             <v-card class="card">
-              <v-card-media :src="addBase(item, 'poster')" height="200px">
+              <v-card-media v-lazy:background-image="addBase(item, 'poster')"  height="200px">
               </v-card-media>
               <v-card-title primary-title>
                 <div>
@@ -51,7 +51,6 @@
   </div>
 </template>
 <script>
-import axios from 'axios'
 import {mapMutations, mapGetters} from 'vuex'
 import {baseUrlMixin, handleContent} from '../../common/js/mixin.js'
 import NoResult from '../../base/no-result/no-result.vue'
@@ -116,7 +115,7 @@ export default {
       }
     },
     initData(baseUrl) { // 基础数据
-      axios.get(baseUrl)
+      this.$http.get(baseUrl)
         .then(res => {
           this.changeSearchStatus(false)
           if (res.data.success) {
@@ -131,7 +130,7 @@ export default {
         })
     },
     loadMore(baseUrl) { // 加载更多
-      axios.get(baseUrl, {
+      this.$http.get(baseUrl, {
         params: {
           start: this.start,
           end: this.start + LENGTH
@@ -193,5 +192,9 @@ export default {
   }
   .home .loadmore-container .text {
     color: rgb(100, 101, 105);
+  }
+  .home .card__media {
+    background-position: 0 center  !important;
+    background-size: 100%;
   }
 </style>

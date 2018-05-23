@@ -60,8 +60,6 @@
 </template>
 
 <script>
-  import axios from 'axios'
-
   export default {
     data() {
       return {
@@ -106,7 +104,7 @@
     methods: {
       submit () {
         if (this.$refs.form.validate()) {
-          axios.post('/admin/login', {
+          this.$http.post('/admin/login', {
             email: this.email,
             password: this.password
           }).then(res => {
