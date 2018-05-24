@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const db = 'mongodb://localhost:19998/premovie'
+const db = 'mongodb://localhost/premovie'
 const glob = require('glob') // 加载匹配到的模块
 const { resolve } = require('path')
 

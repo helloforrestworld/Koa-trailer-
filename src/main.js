@@ -7,8 +7,9 @@ import axios from 'axios'
 import VueAxios from 'vue-axios'
 import Vuetify from 'vuetify'
 import VueLazyLoad from 'vue-lazyload'
+import 'dplayer/dist/DPlayer.min.css'
 import 'vuetify/dist/vuetify.min.css'
-import 'DPlayer/dist/DPlayer.min.css'
+// import 'DPlayer/dist/DPlayer.min.css'
 
 
 Vue.config.productionTip = false

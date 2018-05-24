@@ -9,7 +9,7 @@
   </div>
 </template>
 <script>
-import DPlayer from 'DPlayer'
+import DPlayer from 'dplayer'
 import {mapGetters} from 'vuex'
 import {baseUrlMixin} from '../../common/js/mixin.js'
 

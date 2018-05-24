@@ -71,7 +71,8 @@
   </div>
 </template>
 <script>
-import DPlayer from 'DPlayer'
+import DPlayer from 'dplayer'
+console.log(DPlayer)
 import {baseUrlMixin, handleContent} from '../../common/js/mixin'
 
 export default {

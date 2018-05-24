@@ -5,16 +5,7 @@ const {resolve} = require('path')
 
 const r = path => resolve(__dirname, path)
 
-const bundler = new Bundler(r('../../../index.html'), {
-  publicUrl: '/',
-  watch: false,
-  cache: false,
-  minify: true
-})
-
 export const prod = async app => {
-  await bundler.bundle()
-  
   app.use(stati(r('../../../dist')))
   app.use(views(r('../../../dist')), {
     extension: 'html'
