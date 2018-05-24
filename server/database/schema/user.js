@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcryptjs')
 const Schema = mongoose.Schema
 const Mixed = Schema.Types.Mixed // mongoose的混合数据类型
 const SALT_WORK_FACTOR = 10 // 加盐参数
