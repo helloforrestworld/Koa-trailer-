@@ -8,7 +8,23 @@
 # install dependencies
 npm install
 
-# serve with hot reload at localhost:3333
+# before start
+确保本地安装mongodb并且服务已经开启
+make sure you have installed mongodb and the service is running
+
+默认使用七牛云存储静态资源和CDN加速
+如果没有的朋友可以去注册一个, 实名认证大概半小时，然后可以获取一定量的免费空间和流量
+认证后新建backet
+
+然后修改server/config/index.js下面的内容
+填上你七牛云的相关信息
+
+然后到src/common/js/mixin.js下
+修改addBase方法下的默认链接为你空间的默认外链
+
+然后就可以启动了，有问题可以邮箱私信我
+
+# server with hot reload at localhost:3333
 npm start
 
 # build
