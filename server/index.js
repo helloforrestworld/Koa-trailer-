@@ -7,6 +7,7 @@ const {connect, initSchemas, initUser} = require('./database/init')
 const R = require('ramda')
 const MIDDLEWARES = ['common', 'router', 'parcel']
 
+
 // 加载中间件数组
 const useMiddlewares = (app) => {
   R.map(
@@ -26,11 +27,6 @@ const useMiddlewares = (app) => {
   initSchemas() // 初始化schema
   await initUser() // 初始Forrest用户
   
-  // require('./tasks/movie.js') // 启用movie.js爬虫脚本
-  // require('./tasks/api.js') // 通过豆瓣请求详细数据
-  // require('./tasks/trailer.js') // 封面图和预告片视频地址
-  // require('./tasks/qiniu.js') // 七牛存储静态资源
-  
   await useMiddlewares(app)
   
   app.listen(3333, (err) => {
@@ -40,5 +36,16 @@ const useMiddlewares = (app) => {
       console.log('Test Server Running at port 3333')
     }
   })
+  
+  // 启动爬虫脚本
+  await require('./tasks/movie').crawMoives
+  console.log('基础数据爬取完成')
+  await require('./tasks/api').fetchDetails
+  console.log('数据详情爬取完成')
+  await require('./tasks/trailer').crawTrailer
+  console.log('视频海报爬取完成')
+  const uptoQiniu =  require('./tasks/qiniu').init
+  await uptoQiniu()
+  console.log('视频海报上传七牛云成功')
 })()
 

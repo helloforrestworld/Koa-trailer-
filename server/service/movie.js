@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const Movie = mongoose.model('Movie')
 const Category = mongoose.model('Category')
 import {uploadToQiniu, nanoid} from '../tasks/qiniu'
-import qiniu from '../tasks/qiniu'
+import {init as qiniu} from '../tasks/qiniu'
 import {deepCopy} from '../lib/util'
 
 export const getAllMovies =  async (type, year) => {

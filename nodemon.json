@@ -11,5 +11,5 @@
   "watch": [
     "server/"
   ],
-  "ext": "vue json js "
+  "ext": "json js "
 }

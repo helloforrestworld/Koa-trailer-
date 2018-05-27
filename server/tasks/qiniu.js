@@ -48,7 +48,7 @@ const deleteFromQiniu = async (key) => {
 
 
 // 开始上传数据
-const init = async function init(movie, whichChange){
+export const init = async function init(movie, whichChange){
   return new Promise( async (resolve, reject) => {
     let movies = []
     let first = false
@@ -109,7 +109,6 @@ init().then((res) => {
 }).catch((err) => {
   console.log(err)
 })
-export default init
 
 
 

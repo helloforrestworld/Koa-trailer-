@@ -71,6 +71,9 @@ process.on('message', async (movies) => { // 接受movies开始爬虫
           cover: result.cover,
           doubanId
         }
+        if (i === movies.length - 1) {
+          data.finish = true
+        }
         process.send(data)
       }
       browser.close()
