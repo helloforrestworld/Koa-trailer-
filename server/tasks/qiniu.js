@@ -104,13 +104,3 @@ export const init = async function init(movie, whichChange){
     resolve({success: true})
   })
 }
-init().then((res) => {
-  console.log(res)
-}).catch((err) => {
-  console.log(err)
-})
-
-
-
-
-
