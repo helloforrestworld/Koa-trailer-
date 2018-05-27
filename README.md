@@ -26,6 +26,7 @@ make sure you have installed mongodb and the service is running
 
 # server with hot reload at localhost:3333
 npm start
+// 第一次启动后就可以注释server/index.js下的爬虫脚本了
 
 # build
 make sure install parcel in gobal
