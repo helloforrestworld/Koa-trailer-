@@ -69,6 +69,59 @@ http://vt1.doubanio.com/201805241616/ca24dfd1d36cc84406e361b2c8a90d23/view/movie
 ![此处输入图片的描述][7]
 
 ## 目录结构
+```
+    .
+├── server                                      // 后端服务器
+|   ├── config                                  // 七牛用户配置
+|   ├── crawler                                 // 爬虫脚本
+|       └── trailer-list                        // 基础电影信息爬虫
+|       └── video                               // 视频和海报爬虫
+|   ├── database                                // 数据库相关
+|       └── schema                              // schema配置
+|       └── init                                // 数据库初始化
+|   ├── lib                                     // 工具库
+|       └── decorator                           // 装饰后端路由
+|       └── util                                // 普通工具方法
+|   ├── middlewares                             // 中间件
+|       └── parcel                              // 集成parcel
+|       └── common                              // 普通中间件
+|       └── router                              // 路由中间件
+|   ├── routes                                  // 后端路由配置
+|       └── movie                               // 请求电影相关api
+|       └── user                                // 后台管理相关api
+|   ├── service                                 // 后端服务
+|       └── movie                               // 电影api相关服务
+|       └── user                                // 登录服务
+|   ├── tasks                                   // 进程管理
+|       └── api                                 // 请求详细数据
+|       └── movie                               // 基础数据爬虫进程
+|       └── qiniu                               // 上传静态资源进程
+|       └── trailer                             // 视频海报爬虫进程
+├── src                                         // 前端项目核心文件
+│   ├── base                                    // 公共组件
+|       └── no-result                           // 无结果组件
+│   ├── common                                  // 公共静态资源
+|       └── image                               // 公共图片
+|       └── js                                  // 公共js
+|           └── mixin                           // mixin
+│   ├── components                              // 业务组件
+|       └── home                                // 首页
+|       └── home-content                        // 首页主内容
+|       └── login                               // 登录页
+|       └── management                          // 后台管理页
+|       └── movie-detail                        // 电影详情页
+|       └── player                              // 首页播放器
+|       └── toolbar                             // 头部和左侧导航
+|   ├── router                                  // 前端路由
+|   ├── store                                   // vuex
+|       └── index                               // store入口
+│   ├── App.vue                                 // 组件入口
+│   ├── main.js                                 // 前端入口文件
+├── index.html                                  // 模板html文件
+├── start.js                                    // 项目入口文件
+.
+
+```
 ## 准备工作
 ## 知识点
 ## 总结
